@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<link
+			rel="icon"
+			type="image/svg+xml"
+			href="img/solarnetwork-favicon.svg"
+		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>ToU Explorer</title>
+	</head>
+	<body>
+		<div class="container py-3 px-3 mx-auto">
+			<div class="row">
+				<div class="offset-md-4 col-md-8">
+					<h1>Time of Use Tariff Explorer</h1>
+					<p>
+						Use this form to calculate how much you would pay using
+						a time-of-use based tariff schedule, and compare that to
+						the rate you already pay. Your usage/meter data will be
+						pulled from SolarNetwork, based on the node, source, and
+						datum property you choose.
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="container py-3 px-3 mx-auto">
+			<div class="row g-5">
+				<div class="col-md-4">
+					<form class="p-3" id="data-settings">
+						<h4>Usage/meter data</h4>
+						<div class="row">
+							<div class="col">
+								<label for="startDate" class="form-label"
+									>Start Date</label
+								>
+								<input
+									type="date"
+									class="form-control"
+									id="startDate"
+								/>
+							</div>
+						</div>
+						<div class="row my-3">
+							<div class="col">
+								<label for="endDate" class="form-label"
+									>End Date</label
+								>
+								<input
+									type="date"
+									class="form-control"
+									id="endDate"
+								/>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col">
+								<label for="snToken" class="form-label"
+									>SolarNetwork Token</label
+								>
+								<input
+									type="text"
+									class="form-control"
+									id="snToken"
+								/>
+							</div>
+						</div>
+						<div class="row my-3">
+							<div class="col">
+								<label for="snTokenSecret" class="form-label"
+									>SolarNetwork Secret</label
+								>
+								<input
+									type="password"
+									class="form-control"
+									id="snTokenSecret"
+								/>
+							</div>
+						</div>
+						<div class="row my-3">
+							<div class="col">
+								<label for="snNodeId" class="form-label"
+									>Node ID</label
+								>
+								<input
+									type="number"
+									class="form-control"
+									id="snNodeId"
+								/>
+							</div>
+						</div>
+						<div class="row my-3">
+							<div class="col">
+								<label for="snSourceId" class="form-label"
+									>Source ID</label
+								>
+								<select
+									class="form-control"
+									id="snSourceId"
+								></select>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col">
+								<label for="snDatumProperty" class="form-label"
+									>Datum Property</label
+								>
+								<select
+									class="form-control"
+									id="snDatumProperty"
+								></select>
+							</div>
+						</div>
+					</form>
+				</div>
+				<main class="col-md-8">
+					<form id="tou-settings">
+						<p>
+							Fill in your rate details, which can usually be
+							found on your utility bill.
+						</p>
+						<div class="row g-3 align-items-center">
+							<div class="col-sm-2">
+								<input
+									type="text"
+									class="form-control"
+									id="tariffCurrencyCode"
+									placeholder="Currency"
+									aria-label="Currency"
+									title="Currency code, such as USD, NZD, JPY"
+									value="NZD"
+									required
+								/>
+							</div>
+							<div class="col-sm-3">
+								<input
+									type="number"
+									class="form-control"
+									id="tariffRate"
+									placeholder="Tariff rate"
+									aria-label="Tariff rate"
+									required
+								/>
+							</div>
+							<div class="col-auto">
+								<select
+									class="form-control"
+									id="tariffCurrencyUnit"
+									aria-label="Tariff currency unit"
+									title="Rates expressed as whole ($) or 1/100 (¢) currency units"
+								>
+									<option selected>¢</option>
+									<option>$</option>
+								</select>
+							</div>
+							<div class="col-auto">per</div>
+							<div class="col-sm-3">
+								<input
+									type="number"
+									class="form-control"
+									id="tariffQuantity"
+									placeholder="quantity"
+									aria-label="quantity"
+									required
+								/>
+							</div>
+							<div class="col-auto">
+								<span id="tariff-units"></span>
+								<span> </span>
+								<span>units</span>
+							</div>
+						</div>
+						<p class="mt-5">
+							Next, provide a time-of-use schedule, in the form of
+							a spreadsheet-friendly CSV file. You can download an
+							example schedule from the
+							<b>Example Schedules</b> menu.
+						</p>
+						<div class="row g-3">
+							<div class="col-auto">
+								<input
+									type="file"
+									class="form-control"
+									id="scheduleCsv"
+									accept="*.csv,text/csv"
+									required
+								/>
+							</div>
+							<div class="col-auto dropdown">
+								<button
+									class="btn btn-secondary dropdown-toggle"
+									id="exampleScheduleCsv"
+									type="button"
+									data-bs-toggle="dropdown"
+									aria-expanded="false"
+								>
+									Example Schedules
+								</button>
+								<ul
+									class="dropdown-menu"
+									aria-labelledby="exampleScheduleCsv"
+								>
+									<li>
+										<a
+											class="dropdown-item"
+											href="#"
+											id="example-schedule-csv-01"
+											download="tou-tariff-schedule-example.csv"
+											>Weekday/Weekend two blocks</a
+										>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</form>
+
+					<table
+						class="table table-striped my-3 d-none"
+						id="schedule-table"
+					>
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Months</th>
+								<th>Days</th>
+								<th>Weekdays</th>
+								<th>Hours</th>
+								<th>Rates</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+					<template id="schedule-rule">
+						<tr>
+							<td class="data-idx"></td>
+							<td class="data-months"></td>
+							<td class="data-days"></td>
+							<td class="data-weekdays"></td>
+							<td class="data-hours"></td>
+							<td class="data-rates"></td>
+						</tr>
+					</template>
+
+					<div class="d-grid my-3">
+						<button
+							class="btn btn-primary"
+							id="calculate-tou-button"
+							disabled
+						>
+							Calculate
+						</button>
+					</div>
+
+					<div
+						id="calc-progress"
+						class="progress my-3 d-none"
+						role="progressbar"
+						aria-label="Calculating time of use..."
+						aria-valuenow="100"
+						aria-valuemin="0"
+						aria-valuemax="100"
+					>
+						<div
+							class="progress-bar progress-bar-striped progress-bar-animated"
+							style="width: 100%"
+						></div>
+					</div>
+
+					<div id="tou-results" class="my-5 d-none">
+						<h2>Overall comparison</h2>
+						<p>
+							The following table compares the flat rate you
+							provided to the total time-of-use rate over the same
+							period. The cost difference between the two methods
+							is also shown. A
+							<b>negative</b> difference means the time-of-use
+							rate ends up costing <b>less</b> than the flat rate.
+						</p>
+						<table class="table" id="overall-results-table">
+							<thead>
+								<tr>
+									<th>Type</th>
+									<th class="text-end">Reading Start</th>
+									<th class="text-end">Reading End</th>
+									<th class="text-end">Units Used</th>
+									<th class="text-end">Cost</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr id="overall-non-tou">
+									<td>Flat</td>
+									<td class="data-readingStart text-end"></td>
+									<td class="data-readingEnd text-end"></td>
+									<td class="data-usage text-end"></td>
+									<td class="data-cost text-end"></td>
+								</tr>
+								<tr id="overall-tou">
+									<td>Time of use</td>
+									<td></td>
+									<td></td>
+									<td></td>
+									<td class="data-cost text-end"></td>
+								</tr>
+							</tbody>
+							<tfoot>
+								<tr id="overall-diff">
+									<th>Difference</th>
+									<td colspan="3"></td>
+									<th class="data-cost text-end"></th>
+								</tr>
+							</tfoot>
+						</table>
+
+						<h2 class="mt-5">Time of use breakdown</h2>
+						<p>
+							The following table shows your usage, broken down
+							according to the time-of-use schedule you uploaded.
+							You can see how many units you used and how much
+							this would cost accoding to the schedule. The
+							<b>Total Rate</b> shows the flat rate you would need
+							pay in order for your total cost to work out the
+							same.
+						</p>
+						<table
+							class="table table-striped d-none"
+							id="tou-breakdown-table"
+						>
+							<thead>
+								<tr>
+									<th>#</th>
+									<th class="text-end">Units Used</th>
+									<th>Rate</th>
+									<th class="text-end">Cost</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+							<tfoot>
+								<tr>
+									<th>Total</th>
+									<th class="data-usage text-end"></th>
+									<th class="data-rate"></th>
+									<th class="data-cost text-end"></th>
+								</tr>
+							</tfoot>
+						</table>
+						<template id="tou-breakdown-row">
+							<tr>
+								<td class="data-idx"></td>
+								<td class="data-usage text-end"></td>
+								<td
+									class="data-rate"
+									title="The effective flat (non time-of-use) rate"
+								></td>
+								<td class="data-cost text-end"></td>
+							</tr>
+						</template>
+					</div>
+				</main>
+			</div>
+		</div>
+
+		<script type="module" src="ts/main.ts"></script>
+	</body>
+</html>

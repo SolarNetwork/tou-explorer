@@ -1,0 +1,18 @@
+@import "bootstrap/scss/bootstrap";
+
+#data-settings {
+	background-color: #f3f3f3;
+	border-radius: 8px;
+}
+
+label {
+	font-weight: bold;
+}
+
+tfoot > tr > td,
+tfoot > tr > th {
+	border-top-color: black;
+	border-top-style: solid;
+	border-top-width: 2px;
+	--bs-border-width: 0;
+}
