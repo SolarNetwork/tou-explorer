@@ -5,6 +5,8 @@ pricing against time-of-use tariff pricing. You can try it out here:
 
 <https://go.solarnetwork.net/tou-explorer/>
 
+<img alt="Screenshot of the ToU Explorer app" src="./docs/tou-explorer-screenshot@2x.png" width="1212">
+
 # Building from source
 
 To build yourself, clone or download this repository. You need to have
