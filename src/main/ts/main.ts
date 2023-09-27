@@ -7,6 +7,10 @@ import {
 	TariffRate,
 	TemporalRangesTariff,
 	TemporalRangesTariffSchedule,
+	TemporalRangesTariffScheduleOptions,
+	YearTemporalRangesTariff,
+	YearTemporalRangesTariffSchedule,
+	YearTemporalRangesTariffScheduleOptions,
 } from "nifty-tou";
 import {
 	GeneralDatum,
@@ -15,7 +19,17 @@ import {
 	TouFormElements,
 } from "./utils";
 
-let tariffSchedule: TemporalRangesTariffSchedule;
+let yearMode = false;
+let tariffSchedule:
+	| TemporalRangesTariffSchedule<
+			TemporalRangesTariff,
+			TemporalRangesTariffScheduleOptions
+	  >
+	| YearTemporalRangesTariffSchedule<
+			YearTemporalRangesTariff,
+			YearTemporalRangesTariffScheduleOptions
+	  >;
+
 const settingsForm = document.querySelector<HTMLFormElement>("#data-settings")!;
 const settings = settingsForm.elements as unknown as SettingsFormElements;
 const tariffForm = document.querySelector<HTMLFormElement>("#tou-settings")!;
@@ -58,11 +72,31 @@ document
 		"href",
 		(() => {
 			const csv = `Month,Day,Day of Week,Hour of Day,Rate\r
-		January-December,,Mon-Fri,0-8,10.48\r
-		January-December,,Mon-Fri,8-24,11.00\r
-		January-December,,Sat-Sun,0-8,9.19\r
-		January-December,,Sat-Sun,8-24,11.21\r
-		`.replaceAll("\t", "");
+						January-December,,Mon-Fri,0-8,10.48\r
+						January-December,,Mon-Fri,8-24,11.00\r
+						January-December,,Sat-Sun,0-8,9.19\r
+						January-December,,Sat-Sun,8-24,11.21\r
+						`.replaceAll("\t", "");
+			const uri = encodeURI("data:text/csv;charset=utf-8," + csv);
+			return uri;
+		})()
+	);
+
+document
+	.querySelector<HTMLAnchorElement>("#example-schedule-csv-02")
+	?.setAttribute(
+		"href",
+		(() => {
+			const csv = `Year,Month,Day,Day of Week,Hour of Day,Rate\r
+						2023,January-December,,Mon-Fri,0-8,10.48\r
+						2023,January-December,,Mon-Fri,8-24,11.00\r
+						2023,January-December,,Sat-Sun,0-8,9.19\r
+						2023,January-December,,Sat-Sun,8-24,11.21\r
+						1999,Jan-Dec,,Mon-Fri,0-8,8.32\r
+						1999,Jan-Dec,,Mon-Fri,8-24,10.50\r
+						1999,Jan-Dec,,Sat-Sun,0-8,6.57\r
+						1999,Jan-Dec,,Sat-Sun,8-24,9.99\r
+						`.replaceAll("\t", "");
 			const uri = encodeURI("data:text/csv;charset=utf-8," + csv);
 			return uri;
 		})()
@@ -81,18 +115,26 @@ function parseSchedule() {
 					return;
 				}
 				try {
-					// save header and process each row; every column starting from 5 is a rate
+					// save header and process each row
 					const rules: TemporalRangesTariff[] = [];
 					let header: string[] = [];
+					yearMode = false;
 					for (let row of results.data as string[][]) {
 						if (!header.length) {
 							header = row;
+							if (
+								header.length > 5 &&
+								header[0].toLowerCase() === "year"
+							) {
+								// switch to year-mode
+								yearMode = true;
+							}
 							continue;
 						}
 						if (row.length >= 5) {
 							const rates: TariffRate[] = [];
 							for (
-								let i = 4;
+								let i = yearMode ? 5 : 4;
 								i < row.length && i < header.length;
 								i += 1
 							) {
@@ -103,21 +145,43 @@ function parseSchedule() {
 								);
 								rates.push(rate);
 							}
-							const rule = TemporalRangesTariff.parse(
-								"en-NZ",
-								row[0],
-								row[1],
-								row[2],
-								row[3],
-								rates
-							);
-							rules.push(rule);
+							if (yearMode) {
+								const rule =
+									YearTemporalRangesTariff.parseYears(
+										"en-NZ",
+										row[0],
+										row[1],
+										row[2],
+										row[3],
+										row[4],
+										rates
+									);
+								rules.push(rule);
+							} else {
+								const rule = TemporalRangesTariff.parse(
+									"en-NZ",
+									row[0],
+									row[1],
+									row[2],
+									row[3],
+									rates
+								);
+								rules.push(rule);
+							}
 						}
 					}
 					if (rules.length) {
-						tariffSchedule = new TemporalRangesTariffSchedule(
-							rules
-						);
+						if (yearMode) {
+							tariffSchedule =
+								new YearTemporalRangesTariffSchedule(
+									rules as YearTemporalRangesTariff[],
+									{ yearExtend: true }
+								);
+						} else {
+							tariffSchedule = new TemporalRangesTariffSchedule(
+								rules
+							);
+						}
 						renderTariffSchedule();
 						enableTouCalculation();
 					}
@@ -154,6 +218,7 @@ function renderTariffSchedule() {
 		const row = tmpl.content.cloneNode(true) as HTMLTableRowElement;
 		replaceData(row, {
 			idx: ++idx,
+			years: rule.format(locale, ChronoField.YEAR),
 			months: rule.format(locale, ChronoField.MONTH_OF_YEAR),
 			days: rule.format(locale, ChronoField.DAY_OF_MONTH),
 			weekdays: rule.format(locale, ChronoField.DAY_OF_WEEK),
@@ -170,6 +235,15 @@ function renderTariffSchedule() {
 		});
 		tbody.appendChild(row);
 	}
+
+	for (const el of table.querySelectorAll<HTMLElement>(".year")) {
+		if (yearMode) {
+			el.classList.remove("d-none");
+		} else {
+			el.classList.add("d-none");
+		}
+	}
+
 	table.classList.remove("d-none"); // show table
 }
 
@@ -324,10 +398,10 @@ function betterOrWorseStyle(l: number, r: number, el: HTMLElement) {
 	}
 }
 
-function processDatum(
-	datum: GeneralDatum[],
-	schedule: TemporalRangesTariffSchedule
-) {
+function processDatum<
+	T extends TemporalRangesTariff,
+	O extends TemporalRangesTariffScheduleOptions
+>(datum: GeneralDatum[], schedule: TemporalRangesTariffSchedule<T, O>) {
 	const datumPropName = settings.snDatumProperty.value;
 	const nonTouRate = tariffSettings.tariffRate.valueAsNumber;
 	const rateDivisor =

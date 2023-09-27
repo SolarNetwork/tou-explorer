@@ -106,6 +106,8 @@ async function loadSources(event: Event) {
 				settingsForm.snSourceId.add(opt);
 			}
 		}
+		settingsForm.snSourceId.selectedIndex = 0;
+		settingsForm.snSourceId.dispatchEvent(new Event("change"));
 	}
 }
 
@@ -150,6 +152,8 @@ async function loadSourceProperties() {
 			}
 		}
 	}
+	settingsForm.snDatumProperty.selectedIndex = 0;
+	settingsForm.snDatumProperty.dispatchEvent(new Event("change"));
 }
 
 export async function loadData(): Promise<GeneralDatum[]> {

@@ -210,6 +210,16 @@
 											>Weekday/Weekend two blocks</a
 										>
 									</li>
+									<li>
+										<a
+											class="dropdown-item"
+											href="#"
+											id="example-schedule-csv-02"
+											download="year-tou-tariff-schedule-example.csv"
+											>Year-based Weekday/Weekend two
+											blocks</a
+										>
+									</li>
 								</ul>
 							</div>
 						</div>
@@ -222,6 +232,7 @@
 						<thead>
 							<tr>
 								<th>#</th>
+								<th class="year d-none">Years</th>
 								<th>Months</th>
 								<th>Days</th>
 								<th>Weekdays</th>
@@ -234,6 +245,7 @@
 					<template id="schedule-rule">
 						<tr>
 							<td class="data-idx"></td>
+							<td class="data-years year d-none"></td>
 							<td class="data-months"></td>
 							<td class="data-days"></td>
 							<td class="data-weekdays"></td>
