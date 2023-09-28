@@ -16,3 +16,8 @@ tfoot > tr > th {
 	border-top-width: 2px;
 	--bs-border-width: 0;
 }
+
+.max-height-scroller {
+	max-height: 24rem;
+	overflow-y: scroll;
+}

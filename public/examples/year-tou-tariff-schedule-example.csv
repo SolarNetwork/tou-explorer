@@ -1,0 +1,9 @@
+Year,Month,Day,Day of Week,Hour of Day,Rate
+2023,Jan-Dec,,Mon-Fri,0-8,10.48
+2023,Jan-Dec,,Mon-Fri,8-24,11.00
+2023,Jan-Dec,,Sat-Sun,0-8,9.19
+2023,Jan-Dec,,Sat-Sun,8-24,11.21
+1999,Jan-Dec,,Mon-Fri,0-8,8.32
+1999,Jan-Dec,,Mon-Fri,8-24,10.50
+1999,Jan-Dec,,Sat-Sun,0-8,6.57
+1999,Jan-Dec,,Sat-Sun,8-24,9.99

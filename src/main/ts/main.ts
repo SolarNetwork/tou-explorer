@@ -66,42 +66,6 @@ for (const form of [settingsForm, tariffForm]) {
 	form.addEventListener("change", enableTouCalculation);
 }
 
-document
-	.querySelector<HTMLAnchorElement>("#example-schedule-csv-01")
-	?.setAttribute(
-		"href",
-		(() => {
-			const csv = `Month,Day,Day of Week,Hour of Day,Rate\r
-						January-December,,Mon-Fri,0-8,10.48\r
-						January-December,,Mon-Fri,8-24,11.00\r
-						January-December,,Sat-Sun,0-8,9.19\r
-						January-December,,Sat-Sun,8-24,11.21\r
-						`.replaceAll("\t", "");
-			const uri = encodeURI("data:text/csv;charset=utf-8," + csv);
-			return uri;
-		})()
-	);
-
-document
-	.querySelector<HTMLAnchorElement>("#example-schedule-csv-02")
-	?.setAttribute(
-		"href",
-		(() => {
-			const csv = `Year,Month,Day,Day of Week,Hour of Day,Rate\r
-						2023,January-December,,Mon-Fri,0-8,10.48\r
-						2023,January-December,,Mon-Fri,8-24,11.00\r
-						2023,January-December,,Sat-Sun,0-8,9.19\r
-						2023,January-December,,Sat-Sun,8-24,11.21\r
-						1999,Jan-Dec,,Mon-Fri,0-8,8.32\r
-						1999,Jan-Dec,,Mon-Fri,8-24,10.50\r
-						1999,Jan-Dec,,Sat-Sun,0-8,6.57\r
-						1999,Jan-Dec,,Sat-Sun,8-24,9.99\r
-						`.replaceAll("\t", "");
-			const uri = encodeURI("data:text/csv;charset=utf-8," + csv);
-			return uri;
-		})()
-	);
-
 const scheduleFileInput =
 	document.querySelector<HTMLInputElement>("#scheduleCsv")!;
 scheduleFileInput.addEventListener("change", parseSchedule);
@@ -124,7 +88,7 @@ function parseSchedule() {
 							header = row;
 							if (
 								header.length > 5 &&
-								header[0].toLowerCase() === "year"
+								header[0].toLowerCase().indexOf("year") >= 0
 							) {
 								// switch to year-mode
 								yearMode = true;

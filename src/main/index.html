@@ -204,19 +204,23 @@
 									<li>
 										<a
 											class="dropdown-item"
-											href="#"
-											id="example-schedule-csv-01"
-											download="tou-tariff-schedule-example.csv"
-											>Weekday/Weekend two blocks</a
+											href="examples/tou-tariff-schedule-example.csv"
+											>Weekday/weekend two blocks</a
 										>
 									</li>
 									<li>
 										<a
 											class="dropdown-item"
-											href="#"
-											id="example-schedule-csv-02"
-											download="year-tou-tariff-schedule-example.csv"
-											>Year-based Weekday/Weekend two
+											href="examples/year-tou-tariff-schedule-example.csv"
+											>Year-based weekday/weekend two
+											blocks</a
+										>
+									</li>
+									<li>
+										<a
+											class="dropdown-item"
+											href="examples/144-tariff-schedule-example.csv"
+											>144 4-hourly weekday/weekend
 											blocks</a
 										>
 									</li>
@@ -224,24 +228,25 @@
 							</div>
 						</div>
 					</form>
-
-					<table
-						class="table table-striped my-3 d-none"
-						id="schedule-table"
-					>
-						<thead>
-							<tr>
-								<th>#</th>
-								<th class="year d-none">Years</th>
-								<th>Months</th>
-								<th>Days</th>
-								<th>Weekdays</th>
-								<th>Hours</th>
-								<th>Rates</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
+					<div class="max-height-scroller my-3">
+						<table
+							class="table table-striped d-none"
+							id="schedule-table"
+						>
+							<thead>
+								<tr>
+									<th>#</th>
+									<th class="year d-none">Years</th>
+									<th>Months</th>
+									<th>Days</th>
+									<th>Weekdays</th>
+									<th>Hours</th>
+									<th>Rates</th>
+								</tr>
+							</thead>
+							<tbody></tbody>
+						</table>
+					</div>
 					<template id="schedule-rule">
 						<tr>
 							<td class="data-idx"></td>
@@ -335,7 +340,7 @@
 							same.
 						</p>
 						<table
-							class="table table-striped d-none"
+							class="table table-striped my-3 d-none"
 							id="tou-breakdown-table"
 						>
 							<thead>
