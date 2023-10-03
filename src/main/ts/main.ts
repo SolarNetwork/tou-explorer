@@ -1,34 +1,23 @@
 import "../scss/style.scss";
 import "bootstrap";
 import { loadData, setupSolarNetworkIntegration } from "./sn.ts";
-import Papa from "papaparse";
 import {
 	ChronoField,
-	TariffRate,
 	TemporalRangesTariff,
 	TemporalRangesTariffSchedule,
 	TemporalRangesTariffScheduleOptions,
-	YearTemporalRangesTariff,
-	YearTemporalRangesTariffSchedule,
-	YearTemporalRangesTariffScheduleOptions,
 } from "nifty-tou";
+import { TouBreakdown, OverallUsage } from "./breakdown";
+import { parseScheduleCsv } from "./csv";
+import { SettingsFormElements, TouFormElements } from "./forms";
 import {
 	GeneralDatum,
+	TariffSchedule,
+	formatCurrency,
 	replaceData,
-	SettingsFormElements,
-	TouFormElements,
 } from "./utils";
 
-let yearMode = false;
-let tariffSchedule:
-	| TemporalRangesTariffSchedule<
-			TemporalRangesTariff,
-			TemporalRangesTariffScheduleOptions
-	  >
-	| YearTemporalRangesTariffSchedule<
-			YearTemporalRangesTariff,
-			YearTemporalRangesTariffScheduleOptions
-	  >;
+let tariffSchedule: TariffSchedule | undefined;
 
 const settingsForm = document.querySelector<HTMLFormElement>("#data-settings")!;
 const settings = settingsForm.elements as unknown as SettingsFormElements;
@@ -40,14 +29,20 @@ const calcButton = document.querySelector<HTMLButtonElement>(
 	"#calculate-tou-button"
 )!;
 
+// populate app version and then display it
+replaceData(document.querySelector<HTMLElement>("#app-version")!, {
+	"app-version": APP_VERSION,
+}).classList.add("d-md-block");
+
 calcButton.addEventListener("click", () => {
-	if (tariffSchedule) {
+	const sched = tariffSchedule;
+	if (sched) {
 		calcButton.disabled = true;
 		calcProgressBar.classList.remove("d-none"); // show progress bar
 		resultSection.classList.add("d-none"); // hide old results
 		loadData()
 			.then((datum) => {
-				processDatum(datum, tariffSchedule);
+				processDatum(datum, sched);
 				resultSection.classList.remove("d-none");
 			})
 			.catch((reason) => {
@@ -70,97 +65,19 @@ const scheduleFileInput =
 	document.querySelector<HTMLInputElement>("#scheduleCsv")!;
 scheduleFileInput.addEventListener("change", parseSchedule);
 
-function parseSchedule() {
-	const files = scheduleFileInput?.files;
-	if (files?.length) {
-		Papa.parse(files[0], {
-			complete: (results) => {
-				if (!Array.isArray(results?.data)) {
-					return;
-				}
-				try {
-					// save header and process each row
-					const rules: TemporalRangesTariff[] = [];
-					let header: string[] = [];
-					yearMode = false;
-					for (let row of results.data as string[][]) {
-						if (!header.length) {
-							header = row;
-							if (
-								header.length > 5 &&
-								header[0].toLowerCase().indexOf("year") >= 0
-							) {
-								// switch to year-mode
-								yearMode = true;
-							}
-							continue;
-						}
-						if (row.length >= 5) {
-							const rates: TariffRate[] = [];
-							for (
-								let i = yearMode ? 5 : 4;
-								i < row.length && i < header.length;
-								i += 1
-							) {
-								const rate = TariffRate.parse(
-									"en-NZ",
-									header[i],
-									row[i]
-								);
-								rates.push(rate);
-							}
-							if (yearMode) {
-								const rule =
-									YearTemporalRangesTariff.parseYears(
-										"en-NZ",
-										row[0],
-										row[1],
-										row[2],
-										row[3],
-										row[4],
-										rates
-									);
-								rules.push(rule);
-							} else {
-								const rule = TemporalRangesTariff.parse(
-									"en-NZ",
-									row[0],
-									row[1],
-									row[2],
-									row[3],
-									rates
-								);
-								rules.push(rule);
-							}
-						}
-					}
-					if (rules.length) {
-						if (yearMode) {
-							tariffSchedule =
-								new YearTemporalRangesTariffSchedule(
-									rules as YearTemporalRangesTariff[],
-									{ yearExtend: true }
-								);
-						} else {
-							tariffSchedule = new TemporalRangesTariffSchedule(
-								rules
-							);
-						}
-						renderTariffSchedule();
-						enableTouCalculation();
-					}
-				} catch (e) {
-					console.warn(
-						"Ignoring invalid schedule CSV from error: %s",
-						e
-					);
-				}
-			},
-		});
+async function parseSchedule() {
+	try {
+		const parsed = await parseScheduleCsv(scheduleFileInput?.files);
+		const yearMode = !!parsed.yearMode;
+		tariffSchedule = parsed.schedule;
+		renderTariffSchedule(yearMode);
+		enableTouCalculation();
+	} catch (e) {
+		console.warn(e);
 	}
 }
 
-function renderTariffSchedule() {
+function renderTariffSchedule(yearMode: boolean) {
 	const table: HTMLTableElement = document.querySelector("#schedule-table")!;
 	const tbody: HTMLTableSectionElement = table.querySelector("tbody")!;
 	const tmpl: HTMLTemplateElement = document.querySelector("#schedule-rule")!;
@@ -226,132 +143,6 @@ function enableTouCalculation() {
 	);
 }
 
-const usageFormatter = new Intl.NumberFormat(undefined, {
-	useGrouping: true,
-	maximumFractionDigits: 0,
-});
-
-function formatUsage(n: number): string {
-	if (n === undefined || n === null) {
-		return "";
-	}
-	return usageFormatter.format(n);
-}
-
-function formatCurrency(n: number): string {
-	if (n === undefined || n === null) {
-		return "";
-	}
-	const currencyCode = tariffSettings.tariffCurrencyCode.value || "NZD";
-	const fmt = new Intl.NumberFormat(undefined, {
-		useGrouping: true,
-		style: "currency",
-		currency: currencyCode,
-	});
-	return fmt.format(n);
-}
-
-class TouBreakdown {
-	idx: number;
-	unitQuantity: number;
-	rateDivisor: number;
-	tariff: TemporalRangesTariff;
-	usage: number;
-
-	constructor(
-		idx: number,
-		unitQuantity: number,
-		rateDivisor: number,
-		tariff: TemporalRangesTariff
-	) {
-		this.idx = idx;
-		this.unitQuantity = unitQuantity;
-		this.rateDivisor = rateDivisor;
-		this.tariff = tariff;
-		this.usage = 0;
-	}
-
-	addUsage(amount: number) {
-		this.usage += amount / this.unitQuantity;
-	}
-
-	get cost(): number {
-		let c = 0;
-		for (const rate of Object.values(this.tariff.rates)) {
-			c +=
-				(this.usage * rate.amount * Math.pow(10, rate.exponent)) /
-				this.rateDivisor;
-		}
-		return c;
-	}
-
-	get usageFormatted(): string {
-		return formatUsage(this.usage);
-	}
-
-	get rate(): number {
-		// TODO: assuming just one rate here
-		const rate = Object.values(this.tariff.rates)[0];
-		return rate.amount * Math.pow(10, rate.exponent);
-	}
-
-	get rateFormatted(): string {
-		return "" + this.rate;
-	}
-
-	get costFormatted(): string {
-		return formatCurrency(this.cost);
-	}
-}
-
-class Overall {
-	unitQuantity: number;
-	rate: number;
-	readingStart: number;
-	readingEnd: number;
-	usage: number;
-
-	constructor(unitQuantity: number, rate: number, readingStart: number) {
-		this.unitQuantity = unitQuantity;
-		this.rate = rate;
-		this.readingStart = readingStart / unitQuantity;
-		this.readingEnd = this.readingStart;
-		this.usage = 0;
-	}
-
-	toString() {
-		return `Overall{${this.readingStart}-${this.readingEnd}=${this.usage}}`;
-	}
-
-	addUsage(amount: number) {
-		this.usage += amount / this.unitQuantity;
-	}
-
-	end(readingEnd: number) {
-		this.readingEnd = readingEnd / this.unitQuantity;
-	}
-
-	get cost(): number {
-		return this.usage * this.rate;
-	}
-
-	get readingStartFormatted(): string {
-		return formatUsage(this.readingStart);
-	}
-
-	get readingEndFormatted(): string {
-		return formatUsage(this.readingEnd);
-	}
-
-	get usageFormatted(): string {
-		return formatUsage(this.usage);
-	}
-
-	get costFormatted(): string {
-		return formatCurrency(this.cost);
-	}
-}
-
 function betterOrWorseStyle(l: number, r: number, el: HTMLElement) {
 	if (r > l) {
 		el.classList.remove("text-success");
@@ -372,17 +163,18 @@ function processDatum<
 		tariffSettings.tariffCurrencyUnit.value === "$" ? 1 : 100;
 	const unitQuantity = tariffSettings.tariffQuantity.valueAsNumber;
 	const tariffGroups = new Map<number, TouBreakdown>();
-	let overall: Overall | undefined;
+	let overall: OverallUsage | undefined;
 	let readingEnd: number = -1;
 	for (const d of datum) {
 		if (typeof d[datumPropName] !== "number") {
 			continue;
 		}
 		if (!overall) {
-			overall = new Overall(
+			overall = new OverallUsage(
 				unitQuantity,
 				nonTouRate / rateDivisor,
-				d[datumPropName + "_start"]
+				d[datumPropName + "_start"],
+				tariffSettings.tariffCurrencyCode.value
 			);
 		}
 		overall.addUsage(d[datumPropName]);
@@ -398,7 +190,8 @@ function processDatum<
 					ruleIdx + 1,
 					unitQuantity,
 					rateDivisor,
-					tariff
+					tariff,
+					tariffSettings.tariffCurrencyCode.value
 				);
 				tariffGroups.set(ruleIdx, groupData);
 			}
@@ -410,7 +203,7 @@ function processDatum<
 	}
 	overall.end(readingEnd);
 
-	replaceData(document.querySelector("#overall-non-tou")!, {
+	replaceData(document.querySelector<HTMLElement>("#overall-non-tou")!, {
 		readingStart: overall.readingStartFormatted,
 		readingEnd: overall.readingEndFormatted,
 		usage: overall.usageFormatted,
@@ -429,14 +222,20 @@ function processDatum<
 	for (const b of tous) {
 		overallTouCost += b.cost;
 	}
-	replaceData(document.querySelector("#overall-tou")!, {
-		cost: formatCurrency(overallTouCost),
+	replaceData(document.querySelector<HTMLElement>("#overall-tou")!, {
+		cost: formatCurrency(
+			overallTouCost,
+			tariffSettings.tariffCurrencyCode.value
+		),
 	});
 
 	// calculate Overall diff
 	const diffRow = document.querySelector<HTMLElement>("#overall-diff")!;
 	replaceData(diffRow, {
-		cost: formatCurrency(overallTouCost - overall.cost),
+		cost: formatCurrency(
+			overallTouCost - overall.cost,
+			tariffSettings.tariffCurrencyCode.value
+		),
 	});
 	betterOrWorseStyle(
 		overall.cost,
@@ -477,7 +276,10 @@ function processDatum<
 	replaceData(totalsRow, {
 		usage: overall.usageFormatted,
 		rate: effectiveTouRate.toFixed(2),
-		cost: formatCurrency(overallTouCost),
+		cost: formatCurrency(
+			overallTouCost,
+			tariffSettings.tariffCurrencyCode.value
+		),
 	});
 
 	betterOrWorseStyle(

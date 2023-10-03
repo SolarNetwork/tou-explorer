@@ -1,4 +1,3 @@
-import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -11,6 +10,8 @@ export default defineConfig({
 	base: "./",
 	server: {
 		port: 8080,
-		hot: true,
+	},
+	define: {
+		APP_VERSION: JSON.stringify(process.env.npm_package_version),
 	},
 });

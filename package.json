@@ -1,7 +1,7 @@
 {
 	"name": "tou-explorer",
 	"private": true,
-	"version": "0.0.0",
+	"version": "0.3.0",
 	"author": {
 		"name": "Matt Magoffin",
 		"email": "matt@solarnetwork.net"
@@ -11,7 +11,8 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc && vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"release": "generate-release --current-version \"$(bin/remove-preid)\""
 	},
 	"ava": {
 		"files": [
@@ -33,6 +34,20 @@
 			"text",
 			"html"
 		]
+	},
+	"config": {
+		"generateRelease": {
+			"no_confirm": false,
+			"remote": "origin",
+			"pre_commit_commands": [
+				"npm run build"
+			],
+			"post_complete_commands": [
+				"npm publish",
+				"npmversion --increment prepatch --preid dev --nogit-tag"
+			],
+			"files_to_commit": []
+		}
 	},
 	"dependencies": {
 		"@popperjs/core": "^2.11.8",
