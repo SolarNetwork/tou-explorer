@@ -12,7 +12,7 @@
 		"dev": "vite",
 		"build": "tsc && vite build",
 		"preview": "vite preview",
-		"release": "generate-release --current-version \"$(bin/remove-preid)\""
+		"release": "generate-release --current-version \"$(bin/remove-preid.cjs)\""
 	},
 	"ava": {
 		"files": [
