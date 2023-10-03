@@ -1,73 +1,73 @@
 {
-	"name": "tou-explorer",
-	"private": true,
-	"version": "0.3.0",
-	"author": {
-		"name": "Matt Magoffin",
-		"email": "matt@solarnetwork.net"
-	},
-	"license": "Apache-2.0",
-	"type": "module",
-	"scripts": {
-		"dev": "vite",
-		"build": "tsc && vite build",
-		"preview": "vite preview",
-		"release": "generate-release --current-version \"$(bin/remove-preid.cjs)\""
-	},
-	"ava": {
-		"files": [
-			"src/test/ts/**/*"
-		],
-		"typescript": {
-			"rewritePaths": {
-				"src/": "lib/"
-			},
-			"compile": "tsc"
-		}
-	},
-	"c8": {
-		"exclude": [
-			"src/test/ts/**"
-		],
-		"exclude-after-remap": true,
-		"reporter": [
-			"text",
-			"html"
-		]
-	},
-	"config": {
-		"generateRelease": {
-			"no_confirm": false,
-			"remote": "origin",
-			"pre_commit_commands": [
-				"npm run build"
-			],
-			"post_complete_commands": [
-				"npmversion --increment prepatch --preid dev --nogit-tag"
-			],
-			"files_to_commit": []
-		}
-	},
-	"dependencies": {
-		"@popperjs/core": "^2.11.8",
-		"bootstrap": "^5.3.2",
-		"nifty-tou": "SolarNetwork/nifty-tou#develop",
-		"papaparse": "^5.4.1",
-		"solarnetwork-api-core": "SolarNetwork/sn-api-core-js#feature/n16"
-	},
-	"devDependencies": {
-		"@ava/typescript": "^4.1.0",
-		"@types/papaparse": "^5.3.8",
-		"@typescript-eslint/eslint-plugin": "^6.7.2",
-		"@typescript-eslint/parser": "^6.7.2",
-		"ava": "^5.3.1",
-		"c8": "^8.0.1",
-		"eslint": "^8.49.0",
-		"generate-release": "^1.1.1",
-		"npmversion": "^1.7.0",
-		"sass": "^1.67.0",
-		"typedoc": "^0.25.1",
-		"typescript": "^5.2.2",
-		"vite": "^4.4.9"
-	}
+  "name": "tou-explorer",
+  "private": true,
+  "version": "1.0.0",
+  "author": {
+    "name": "Matt Magoffin",
+    "email": "matt@solarnetwork.net"
+  },
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "release": "generate-release --current-version \"$(bin/remove-preid.cjs)\""
+  },
+  "ava": {
+    "files": [
+      "src/test/ts/**/*"
+    ],
+    "typescript": {
+      "rewritePaths": {
+        "src/": "lib/"
+      },
+      "compile": "tsc"
+    }
+  },
+  "c8": {
+    "exclude": [
+      "src/test/ts/**"
+    ],
+    "exclude-after-remap": true,
+    "reporter": [
+      "text",
+      "html"
+    ]
+  },
+  "config": {
+    "generateRelease": {
+      "no_confirm": false,
+      "remote": "origin",
+      "pre_commit_commands": [
+        "npm run build"
+      ],
+      "post_complete_commands": [
+        "npmversion --increment prepatch --preid dev --nogit-tag"
+      ],
+      "files_to_commit": []
+    }
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.2",
+    "nifty-tou": "SolarNetwork/nifty-tou#develop",
+    "papaparse": "^5.4.1",
+    "solarnetwork-api-core": "SolarNetwork/sn-api-core-js#feature/n16"
+  },
+  "devDependencies": {
+    "@ava/typescript": "^4.1.0",
+    "@types/papaparse": "^5.3.8",
+    "@typescript-eslint/eslint-plugin": "^6.7.2",
+    "@typescript-eslint/parser": "^6.7.2",
+    "ava": "^5.3.1",
+    "c8": "^8.0.1",
+    "eslint": "^8.49.0",
+    "generate-release": "^1.1.1",
+    "npmversion": "^1.7.0",
+    "sass": "^1.67.0",
+    "typedoc": "^0.25.1",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9"
+  }
 }
