@@ -39,7 +39,7 @@
 		"bootstrap": "^5.3.2",
 		"nifty-tou": "SolarNetwork/nifty-tou#develop",
 		"papaparse": "^5.4.1",
-		"solarnetwork-api-core": "^1.0.0"
+		"solarnetwork-api-core": "SolarNetwork/sn-api-core-js#feature/n16"
 	},
 	"devDependencies": {
 		"@ava/typescript": "^4.1.0",
