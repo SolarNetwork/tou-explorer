@@ -17,6 +17,8 @@ import {
 	replaceData,
 } from "./utils";
 
+const ACTIVE_TARIFF_CLASS = "active-tariff";
+
 let tariffSchedule: TariffSchedule | undefined;
 
 const settingsForm = document.querySelector<HTMLFormElement>("#data-settings")!;
@@ -72,9 +74,38 @@ async function parseSchedule() {
 		tariffSchedule = parsed.schedule;
 		renderTariffSchedule(yearMode);
 		enableTouCalculation();
+		scheduleUpdateActiveTariffRules();
 	} catch (e) {
 		console.warn(e);
 	}
+}
+
+function updateActiveTariffRules() {
+	if (!tariffSchedule) {
+		return;
+	}
+	const table: HTMLTableElement = document.querySelector("#schedule-table")!;
+	const rows = table.querySelectorAll<HTMLTableRowElement>("tbody > tr")!;
+	const activeRules = tariffSchedule.matches(new Date());
+	for (
+		let i = 0;
+		i < rows.length && i < tariffSchedule.rules.length;
+		i += 1
+	) {
+		if (activeRules.indexOf(tariffSchedule.rules[i]) >= 0) {
+			rows[i].classList.add(ACTIVE_TARIFF_CLASS);
+		} else {
+			rows[i].classList.remove(ACTIVE_TARIFF_CLASS);
+		}
+	}
+}
+
+function scheduleUpdateActiveTariffRules() {
+	const delay = (60 - new Date().getSeconds()) * 1000 + 5;
+	setTimeout(() => {
+		updateActiveTariffRules();
+		scheduleUpdateActiveTariffRules();
+	}, delay);
 }
 
 function renderTariffSchedule(yearMode: boolean) {
@@ -93,10 +124,14 @@ function renderTariffSchedule(yearMode: boolean) {
 	}
 
 	const locale = new Intl.DateTimeFormat().resolvedOptions().locale;
+	const activeRules = tariffSchedule.matches(new Date());
 
 	let idx = 0;
 	for (const rule of tariffSchedule.rules) {
-		const row = tmpl.content.cloneNode(true) as HTMLTableRowElement;
+		const copy = tmpl.content.cloneNode(true);
+		const row = (copy as DocumentFragment).querySelector(
+			"tr"
+		) as HTMLTableRowElement;
 		replaceData(row, {
 			idx: ++idx,
 			years: rule.format(locale, ChronoField.YEAR),
@@ -114,6 +149,9 @@ function renderTariffSchedule(yearMode: boolean) {
 							.join(", ")
 				: undefined,
 		});
+		if (activeRules.indexOf(rule) >= 0) {
+			row.classList.add(ACTIVE_TARIFF_CLASS);
+		}
 		tbody.appendChild(row);
 	}
 

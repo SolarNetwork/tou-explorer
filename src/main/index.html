@@ -249,6 +249,12 @@
 							class="table table-striped d-none"
 							id="schedule-table"
 						>
+							<caption>
+								<small
+									>Tariff rules active right now are shown in
+									bold.</small
+								>
+							</caption>
 							<thead>
 								<tr>
 									<th>#</th>
@@ -260,7 +266,7 @@
 									<th>Rates</th>
 								</tr>
 							</thead>
-							<tbody></tbody>
+							<tbody class="table-group-divider"></tbody>
 						</table>
 					</div>
 					<template id="schedule-rule">
@@ -320,7 +326,7 @@
 									<th class="text-end">Cost</th>
 								</tr>
 							</thead>
-							<tbody>
+							<tbody class="table-group-divider">
 								<tr id="overall-non-tou">
 									<td>Flat</td>
 									<td class="data-readingStart text-end"></td>
@@ -336,7 +342,7 @@
 									<td class="data-cost text-end"></td>
 								</tr>
 							</tbody>
-							<tfoot>
+							<tfoot class="table-group-divider">
 								<tr id="overall-diff">
 									<th>Difference</th>
 									<td colspan="3"></td>
@@ -367,8 +373,8 @@
 									<th class="text-end">Cost</th>
 								</tr>
 							</thead>
-							<tbody></tbody>
-							<tfoot>
+							<tbody class="table-group-divider"></tbody>
+							<tfoot class="table-group-divider">
 								<tr>
 									<th>Total</th>
 									<th class="data-usage text-end"></th>
