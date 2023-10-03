@@ -81,13 +81,15 @@ async function loadSources(event: Event) {
 	const filter = new DatumFilter();
 	filter.nodeId = nodeId;
 	if (startDate) {
-		filter.startDate = startDate;
+		startDate.setHours(0, 0, 0, 0);
+		filter.localStartDate = startDate;
 	}
 	if (endDate) {
-		filter.endDate = endDate;
+		endDate.setHours(0, 0, 0, 0);
+		filter.localEndDate = endDate;
 	}
 
-	const findSourcesUrl = urlHelper.availableSourcesUrl(filter);
+	const findSourcesUrl = urlHelper.findSourcesUrl(filter);
 	const headers = authorizeUrl(findSourcesUrl);
 	const res = await fetch(findSourcesUrl, {
 		method: "GET",
@@ -101,8 +103,8 @@ async function loadSources(event: Event) {
 		}
 		if (json.data.length) {
 			settingsForm.snSourceId.add(new Option("Choose...", ""));
-			for (const sourceId of json.data) {
-				const opt = new Option(sourceId, sourceId);
+			for (const src of json.data) {
+				const opt = new Option(src.sourceId, src.sourceId);
 				settingsForm.snSourceId.add(opt);
 			}
 		}
@@ -172,10 +174,12 @@ export async function loadData(): Promise<GeneralDatum[]> {
 	filter.nodeId = nodeId;
 	filter.sourceId = sourceId;
 	if (startDate) {
-		filter.startDate = startDate;
+		startDate.setHours(0, 0, 0, 0);
+		filter.localStartDate = startDate;
 	}
 	if (endDate) {
-		filter.endDate = endDate;
+		endDate.setHours(0, 0, 0, 0);
+		filter.localEndDate = endDate;
 	}
 
 	const streamDataUrl =
