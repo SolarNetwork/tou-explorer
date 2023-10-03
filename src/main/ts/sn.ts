@@ -7,7 +7,8 @@ import {
 	NodeDatumUrlHelper,
 	streamDatumUtils,
 } from "solarnetwork-api-core";
-import { GeneralDatum, SettingsFormElements } from "./utils";
+import { SettingsFormElements } from "./forms";
+import { GeneralDatum } from "./utils";
 
 const urlHelper = new NodeDatumUrlHelper();
 const auth = new AuthorizationV2Builder();
