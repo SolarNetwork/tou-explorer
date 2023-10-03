@@ -43,7 +43,6 @@
 				"npm run build"
 			],
 			"post_complete_commands": [
-				"npm publish",
 				"npmversion --increment prepatch --preid dev --nogit-tag"
 			],
 			"files_to_commit": []
