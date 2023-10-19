@@ -99,11 +99,13 @@ export async function parseScheduleCsv(
 						//renderTariffSchedule();
 						//enableTouCalculation();
 					}
+					reject("No rows available.");
 				} catch (e) {
 					console.warn(
 						"Ignoring invalid schedule CSV from error: %s",
 						e
 					);
+					reject(e);
 				}
 			},
 		});

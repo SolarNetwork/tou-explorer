@@ -53,6 +53,7 @@
     "bootstrap": "^5.3.2",
     "nifty-tou": "SolarNetwork/nifty-tou#develop",
     "papaparse": "^5.4.1",
+    "read-excel-file": "^5.7.1",
     "solarnetwork-api-core": "SolarNetwork/sn-api-core-js#feature/ts"
   },
   "devDependencies": {
@@ -69,5 +70,12 @@
     "typedoc": "^0.25.1",
     "typescript": "^5.2.2",
     "vite": "^4.4.9"
+  },
+  "overrides": {
+    "json5": "2.2.3",
+    "lodash": "4.17.21",
+    "minimist": "1.2.8",
+    "postcss": "8.4.31",
+    "semver": "7.5.4"
   }
 }

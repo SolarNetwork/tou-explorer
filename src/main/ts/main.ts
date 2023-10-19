@@ -1,6 +1,11 @@
 import "../scss/style.scss";
 import "bootstrap";
-import { loadData, setupSolarNetworkIntegration } from "./sn.ts";
+import {
+	loadData as byodLoadData,
+	setupByodIntegration,
+	ENERGY_DATUM_PROPERTY,
+} from "./byodata.ts";
+import { loadData as snLoadData, setupSolarNetworkIntegration } from "./sn.ts";
 import {
 	ChronoField,
 	TemporalRangesTariff,
@@ -9,7 +14,11 @@ import {
 } from "nifty-tou";
 import { TouBreakdown, OverallUsage } from "./breakdown";
 import { parseScheduleCsv } from "./csv";
-import { SettingsFormElements, TouFormElements } from "./forms";
+import {
+	ByodSettingsFormElements,
+	SnSettingsFormElements,
+	TouFormElements,
+} from "./forms";
 import {
 	GeneralDatum,
 	TariffSchedule,
@@ -21,8 +30,16 @@ const ACTIVE_TARIFF_CLASS = "active-tariff";
 
 let tariffSchedule: TariffSchedule | undefined;
 
-const settingsForm = document.querySelector<HTMLFormElement>("#data-settings")!;
-const settings = settingsForm.elements as unknown as SettingsFormElements;
+const byodSettingsTab =
+	document.querySelector<HTMLButtonElement>("#data-byodata-tab")!;
+const byodSettingsForm = document.querySelector<HTMLFormElement>(
+	"#data-byodata-settings"
+)!;
+const byodSettings =
+	byodSettingsForm.elements as unknown as ByodSettingsFormElements;
+const snSettingsForm =
+	document.querySelector<HTMLFormElement>("#data-sn-settings")!;
+const snSettings = snSettingsForm.elements as unknown as SnSettingsFormElements;
 const tariffForm = document.querySelector<HTMLFormElement>("#tou-settings")!;
 const tariffSettings = tariffForm.elements as unknown as TouFormElements;
 const calcProgressBar = document.querySelector<HTMLElement>("#calc-progress")!;
@@ -31,10 +48,30 @@ const calcButton = document.querySelector<HTMLButtonElement>(
 	"#calculate-tou-button"
 )!;
 
+/**
+ * The type of data source.
+ */
+enum DataSource {
+	BYOD,
+	SN,
+}
+
+function currentDataSource(): DataSource {
+	return byodSettingsTab.classList.contains("active")
+		? DataSource.BYOD
+		: DataSource.SN;
+}
+
 // populate app version and then display it
 replaceData(document.querySelector<HTMLElement>("#app-version")!, {
 	"app-version": APP_VERSION,
 }).classList.add("d-md-block");
+
+document
+	.querySelector<HTMLElement>("#data-settings-tabs")!
+	.addEventListener("shown.bs.tab", () => {
+		enableTouCalculation();
+	});
 
 calcButton.addEventListener("click", () => {
 	const sched = tariffSchedule;
@@ -42,7 +79,7 @@ calcButton.addEventListener("click", () => {
 		calcButton.disabled = true;
 		calcProgressBar.classList.remove("d-none"); // show progress bar
 		resultSection.classList.add("d-none"); // hide old results
-		loadData()
+		(currentDataSource() === DataSource.BYOD ? byodLoadData : snLoadData)()
 			.then((datum) => {
 				processDatum(datum, sched);
 				resultSection.classList.remove("d-none");
@@ -57,15 +94,17 @@ calcButton.addEventListener("click", () => {
 	}
 });
 
-setupSolarNetworkIntegration(settings);
+setupByodIntegration(byodSettings);
+setupSolarNetworkIntegration(snSettings);
 
-for (const form of [settingsForm, tariffForm]) {
+for (const form of [snSettingsForm, tariffForm]) {
 	form.addEventListener("change", enableTouCalculation);
 }
 
 const scheduleFileInput =
 	document.querySelector<HTMLInputElement>("#scheduleCsv")!;
 scheduleFileInput.addEventListener("change", parseSchedule);
+parseSchedule();
 
 async function parseSchedule() {
 	try {
@@ -167,17 +206,20 @@ function renderTariffSchedule(yearMode: boolean) {
 }
 
 function enableTouCalculation() {
+	const mode = currentDataSource();
 	calcButton.disabled = !(
-		settings.startDate.valueAsDate &&
-		settings.endDate.valueAsDate &&
-		settings.snToken.value &&
-		settings.snTokenSecret.value &&
-		settings.snNodeId.value &&
-		settings.snSourceId.selectedIndex > 0 &&
-		settings.snDatumProperty.selectedIndex > 0 &&
 		tariffSettings.tariffRate.value &&
 		tariffSettings.tariffQuantity.value &&
-		tariffSchedule
+		tariffSchedule &&
+		(mode === DataSource.BYOD
+			? !!byodSettings.usageDataFile.files?.length
+			: snSettings.startDate.valueAsDate &&
+			  snSettings.endDate.valueAsDate &&
+			  snSettings.snToken.value &&
+			  snSettings.snTokenSecret.value &&
+			  snSettings.snNodeId.value &&
+			  snSettings.snSourceId.selectedIndex > 0 &&
+			  snSettings.snDatumProperty.selectedIndex > 0)
 	);
 }
 
@@ -194,8 +236,9 @@ function betterOrWorseStyle(l: number, r: number, el: HTMLElement) {
 function processDatum<
 	T extends TemporalRangesTariff,
 	O extends TemporalRangesTariffScheduleOptions
->(datum: GeneralDatum[], schedule: TemporalRangesTariffSchedule<T, O>) {
-	const datumPropName = settings.snDatumProperty.value;
+>(datum: Iterable<GeneralDatum>, schedule: TemporalRangesTariffSchedule<T, O>) {
+	const datumPropName =
+		snSettings.snDatumProperty.value || ENERGY_DATUM_PROPERTY;
 	const nonTouRate = tariffSettings.tariffRate.valueAsNumber;
 	const rateDivisor =
 		tariffSettings.tariffCurrencyUnit.value === "$" ? 1 : 100;

@@ -10,14 +10,14 @@ import {
 import { DatumStreamMetadataRegistry } from "solarnetwork-api-core/lib/util";
 import { datumForStreamData } from "solarnetwork-api-core/lib/util/datum";
 
-import { SettingsFormElements } from "./forms";
+import { SnSettingsFormElements } from "./forms";
 import { GeneralDatum } from "./utils";
 
 const urlHelper = new SolarQueryApi();
 const auth = new AuthorizationV2Builder();
-let settingsForm: SettingsFormElements;
+let settingsForm: SnSettingsFormElements;
 
-export function setupSolarNetworkIntegration(form: SettingsFormElements) {
+export function setupSolarNetworkIntegration(form: SnSettingsFormElements) {
 	settingsForm = form;
 	for (const control of [
 		settingsForm.startDate,
@@ -162,7 +162,7 @@ async function loadSourceProperties() {
 	settingsForm.snDatumProperty.dispatchEvent(new Event("change"));
 }
 
-export async function loadData(): Promise<GeneralDatum[]> {
+export async function loadData(): Promise<Iterable<GeneralDatum>> {
 	const nodeId = settingsForm.snNodeId.value;
 	const sourceId = settingsForm.snSourceId.value;
 
