@@ -1,4 +1,7 @@
-export interface SettingsFormElements extends HTMLFormControlsCollection {
+export interface ByodSettingsFormElements extends HTMLFormControlsCollection {
+	usageDataFile: HTMLInputElement;
+}
+export interface SnSettingsFormElements extends HTMLFormControlsCollection {
 	snToken: HTMLInputElement;
 	snTokenSecret: HTMLInputElement;
 	snNodeId: HTMLInputElement;

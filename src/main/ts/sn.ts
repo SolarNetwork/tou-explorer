@@ -1,20 +1,23 @@
 import {
 	Aggregations,
-	AuthorizationV2Builder,
 	DatumFilter,
 	DatumReadingTypes,
-	DatumStreamMetadataRegistry,
-	NodeDatumUrlHelper,
-	streamDatumUtils,
-} from "solarnetwork-api-core";
-import { SettingsFormElements } from "./forms";
+} from "solarnetwork-api-core/lib/domain";
+import {
+	AuthorizationV2Builder,
+	SolarQueryApi,
+} from "solarnetwork-api-core/lib/net";
+import { DatumStreamMetadataRegistry } from "solarnetwork-api-core/lib/util";
+import { datumForStreamData } from "solarnetwork-api-core/lib/util/datum";
+
+import { SnSettingsFormElements } from "./forms";
 import { GeneralDatum } from "./utils";
 
-const urlHelper = new NodeDatumUrlHelper();
+const urlHelper = new SolarQueryApi();
 const auth = new AuthorizationV2Builder();
-let settingsForm: SettingsFormElements;
+let settingsForm: SnSettingsFormElements;
 
-export function setupSolarNetworkIntegration(form: SettingsFormElements) {
+export function setupSolarNetworkIntegration(form: SnSettingsFormElements) {
 	settingsForm = form;
 	for (const control of [
 		settingsForm.startDate,
@@ -46,7 +49,7 @@ function authorizeUrl(url: string): Headers {
 	const authHeader = auth.reset().snDate(true).url(url).buildWithSavedKey();
 	return new Headers({
 		Authorization: authHeader,
-		"X-SN-Date": auth.requestDateHeaderValue,
+		"X-SN-Date": auth.requestDateHeaderValue!,
 		Accept: "application/json",
 	});
 }
@@ -80,7 +83,7 @@ async function loadSources(event: Event) {
 	const endDate = toExclusiveDate(settingsForm.endDate.valueAsDate);
 
 	const filter = new DatumFilter();
-	filter.nodeId = nodeId;
+	filter.nodeId = Number(nodeId);
 	if (startDate) {
 		startDate.setHours(0, 0, 0, 0);
 		filter.localStartDate = startDate;
@@ -125,7 +128,7 @@ async function loadSourceProperties() {
 		return;
 	}
 	const filter = new DatumFilter();
-	filter.nodeId = nodeId;
+	filter.nodeId = Number(nodeId);
 	filter.sourceId = sourceId;
 	const streamMetaUrl =
 		urlHelper.baseUrl() +
@@ -159,7 +162,7 @@ async function loadSourceProperties() {
 	settingsForm.snDatumProperty.dispatchEvent(new Event("change"));
 }
 
-export async function loadData(): Promise<GeneralDatum[]> {
+export async function loadData(): Promise<Iterable<GeneralDatum>> {
 	const nodeId = settingsForm.snNodeId.value;
 	const sourceId = settingsForm.snSourceId.value;
 
@@ -172,7 +175,7 @@ export async function loadData(): Promise<GeneralDatum[]> {
 
 	const filter = new DatumFilter();
 	filter.aggregation = Aggregations.Hour;
-	filter.nodeId = nodeId;
+	filter.nodeId = Number(nodeId);
 	filter.sourceId = sourceId;
 	if (startDate) {
 		startDate.setHours(0, 0, 0, 0);
@@ -208,10 +211,18 @@ export async function loadData(): Promise<GeneralDatum[]> {
 
 	const result: GeneralDatum[] = [];
 	const reg = DatumStreamMetadataRegistry.fromJsonObject(json.meta);
+	if (!reg) {
+		return Promise.reject("JSON could not be parsed.");
+	}
 	for (const data of json.data) {
 		const meta = reg.metadataAt(data[0]);
-		const d = streamDatumUtils.datumForStreamData(data, meta)?.toObject();
-		result.push(d);
+		if (!meta) {
+			continue;
+		}
+		const d = datumForStreamData(data, meta)?.toObject();
+		if (d) {
+			result.push(d as GeneralDatum);
+		}
 	}
 	return Promise.resolve(result);
 }

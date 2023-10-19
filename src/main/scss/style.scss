@@ -1,8 +1,10 @@
 @import "bootstrap/scss/bootstrap";
 
-#data-settings {
+#data-settings-tab-content {
 	background-color: #f3f3f3;
-	border-radius: 8px;
+	border-radius: 0 0 8px 8px;
+	border: 1px solid $nav-tabs-border-color;
+  	border-top: none;
 }
 
 label {
