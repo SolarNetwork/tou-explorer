@@ -335,23 +335,29 @@ function cellDate(row: any[], idx: number): Date {
 const PROPERTY_PATTERNS = new Map<DatumProperty, RegExp>();
 PROPERTY_PATTERNS.set(
 	DatumProperty.APPARENT_ENERGY,
-	/(?:apparent energy|VAh$)/i
+	/(?:apparent energy|VAh(?:\)|$))/i
 );
-PROPERTY_PATTERNS.set(DatumProperty.APPARENT_POWER, /(?:apparent power|VA$)/i);
+PROPERTY_PATTERNS.set(
+	DatumProperty.APPARENT_POWER,
+	/(?:apparent power|VA(?:\)|$))/i
+);
 PROPERTY_PATTERNS.set(
 	DatumProperty.ENERGY,
-	/(?:(?<!apparent ?)(?<!reactive ?)energy$|Wh$)/i
+	/(?:(?<!apparent ?)(?<!reactive ?)energy$|Wh(?:\)|$))/i
 );
 PROPERTY_PATTERNS.set(
 	DatumProperty.POWER,
-	/(?:(?<!apparent ?)(?<!reactive ?)power(?! ?factor)|W$)/i
+	/(?:(?<!apparent ?)(?<!reactive ?)power(?! ?factor)|W(?:\)|$))/i
 );
-PROPERTY_PATTERNS.set(DatumProperty.POWER_FACTOR, /(?:factor|PF$)/i);
+PROPERTY_PATTERNS.set(DatumProperty.POWER_FACTOR, /(?:factor|PF(?:\)|$))/i);
 PROPERTY_PATTERNS.set(
 	DatumProperty.REACTIVE_ENERGY,
-	/(?:reactive energy|VARh$)/i
+	/(?:reactive energy|VARh(?:\)|$))/i
 );
-PROPERTY_PATTERNS.set(DatumProperty.REACTIVE_POWER, /(?:reactive power|VAR$)/i);
+PROPERTY_PATTERNS.set(
+	DatumProperty.REACTIVE_POWER,
+	/(?:reactive power|VAR(?:\)|$))/i
+);
 
 /**
  * Extract a mapping of datum property column headers from a sheet header row.
