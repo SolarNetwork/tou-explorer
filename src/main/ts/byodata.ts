@@ -367,11 +367,13 @@ PROPERTY_PATTERNS.set(
  */
 function extractPropertyCols(headerRow: string[]): Map<number, DatumProperty> {
 	const result = new Map<number, DatumProperty>();
+	const reverse = new Map<DatumProperty, number>();
 	const colCount = headerRow.length;
 	for (let i = 0; i < colCount; i += 1) {
 		for (const [propName, regex] of PROPERTY_PATTERNS) {
-			if (regex.test(headerRow[i]) && !result.has(i)) {
+			if (regex.test(headerRow[i]) && !reverse.has(propName)) {
 				result.set(i, propName);
+				reverse.set(propName, i);
 				break;
 			}
 		}
