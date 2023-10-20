@@ -3,7 +3,7 @@ import { GeneralDatum } from "./utils";
 
 import readXlsxFile from "read-excel-file";
 import Papa from "papaparse";
-import { timeParse, timeFormat } from "d3-time-format";
+import { timeParse } from "d3-time-format";
 
 const EXCEL_CONTENT_TYPE =
 	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -161,7 +161,6 @@ function decodeData(raw: any[][]): Iterable<GeneralDatum> {
 		return [];
 	}
 	const headerRow = raw[0];
-	const colCount = headerRow.length;
 	const dateCol = findDateCol(headerRow); // first date col
 	const timeColMinutes = extractTimeCols(headerRow); // cols that appear to be time offsets
 
