@@ -15,18 +15,47 @@ const ENERGY_DATUM_PROPERTY_START = ENERGY_DATUM_PROPERTY + "_start";
 const ENERGY_DATUM_PROPERTY_END = ENERGY_DATUM_PROPERTY + "_end";
 
 let settingsForm: ByodSettingsFormElements;
+let rawData: any[][] | undefined;
+let datumStream: Iterable<GeneralDatum> | undefined;
 
 export function setupByodIntegration(form: ByodSettingsFormElements) {
 	settingsForm = form;
+	settingsForm.usageDataFile.addEventListener("change", () => {
+		if (rawData) {
+			console.debug("Reset parsed data.");
+			rawData = undefined;
+			datumStream = undefined;
+		}
+	});
+}
+
+export async function extractHeader(): Promise<string[]> {
+	if (rawData && rawData.length) {
+		return rawData[0];
+	}
+	try {
+		rawData = await parseData(settingsForm.usageDataFile?.files);
+		console.debug("Parsed raw data: %o", rawData);
+		if (rawData && rawData.length) {
+			return rawData[0];
+		}
+		return Promise.reject("No data available.");
+	} catch (e) {
+		console.warn(e);
+		return Promise.reject(e);
+	}
 }
 
 export async function loadData(): Promise<Iterable<GeneralDatum>> {
+	if (datumStream) {
+		return datumStream;
+	}
 	try {
-		const raw = await parseData(settingsForm.usageDataFile?.files);
-		console.debug("Parsed raw data: %o", raw);
-		const decoded: Iterable<GeneralDatum> = decodeData(raw);
-		console.debug("Decoded data: %o", Array.from(decoded));
-		return decoded;
+		rawData = await parseData(settingsForm.usageDataFile?.files);
+		console.debug("Parsed raw data: %o", rawData);
+		datumStream = decodeData(rawData);
+		console.debug("Decoded data: %o", Array.from(datumStream));
+		return datumStream;
 	} catch (e) {
 		console.warn(e);
 		return Promise.reject(e);
