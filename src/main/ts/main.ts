@@ -3,7 +3,7 @@ import "bootstrap";
 import {
 	loadData as byodLoadData,
 	setupByodIntegration,
-	ENERGY_DATUM_PROPERTY,
+	DatumProperty,
 } from "./byodata.ts";
 import { loadData as snLoadData, setupSolarNetworkIntegration } from "./sn.ts";
 import {
@@ -238,7 +238,7 @@ function processDatum<
 	O extends TemporalRangesTariffScheduleOptions
 >(datum: Iterable<GeneralDatum>, schedule: TemporalRangesTariffSchedule<T, O>) {
 	const datumPropName =
-		snSettings.snDatumProperty.value || ENERGY_DATUM_PROPERTY;
+		snSettings.snDatumProperty.value || DatumProperty.ENERGY;
 	const nonTouRate = tariffSettings.tariffRate.valueAsNumber;
 	const rateDivisor =
 		tariffSettings.tariffCurrencyUnit.value === "$" ? 1 : 100;
