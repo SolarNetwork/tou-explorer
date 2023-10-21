@@ -1,4 +1,4 @@
-import bb, { Chart, area, bar, line, zoom } from "billboard.js";
+import bb, { area, line, zoom } from "billboard.js";
 import { GeneralDatum } from "./utils";
 import { DatumProperty } from "./byodata";
 import { timeFormat } from "d3-time-format";
@@ -8,8 +8,6 @@ import { seasonForDate } from "solarnetwork-api-core/lib/util/dates";
 const tooltipDateFormat = timeFormat("%Y-%m-%d %H:%M");
 
 let datum: GeneralDatum[];
-let energyChart: Chart;
-let seasonalDowChart: Chart;
 
 export function renderCharts(data: Iterable<GeneralDatum>) {
 	datum = Array.from(data);
@@ -19,7 +17,7 @@ export function renderCharts(data: Iterable<GeneralDatum>) {
 }
 
 function generateEnergyChart() {
-	energyChart = bb.generate({
+	bb.generate({
 		data: {
 			json: datum,
 			keys: {
@@ -127,7 +125,7 @@ function generateSeasonalWeekdayChart() {
 
 	console.debug("Grouped by seasonal weekday: %o", result);
 
-	seasonalDowChart = bb.generate({
+	bb.generate({
 		data: {
 			x: "x",
 			columns: result,
@@ -215,7 +213,7 @@ function generateSeasonalTimeOfDayChart() {
 
 	console.debug("Grouped by seasonal time of day: %o", result);
 
-	seasonalDowChart = bb.generate({
+	bb.generate({
 		data: {
 			x: "x",
 			columns: result,
