@@ -14,7 +14,6 @@ import {
 	TemporalRangesTariffScheduleOptions,
 } from "nifty-tou";
 import { TouBreakdown, OverallUsage } from "./breakdown";
-import { renderCharts } from "./charts.ts";
 import { parseScheduleCsv } from "./csv";
 import {
 	ByodSettingsFormElements,
@@ -85,9 +84,9 @@ calcButton.addEventListener("click", () => {
 			.then((datum) => {
 				processDatum(datum, sched);
 				resultSection.classList.remove("d-none");
-				setTimeout(() => {
+				import("./charts.ts").then(({ renderCharts }) => {
 					renderCharts(datum);
-				}, 200);
+				});
 			})
 			.catch((reason) => {
 				console.error("Error calculating ToU: %s", reason);
