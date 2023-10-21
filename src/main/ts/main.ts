@@ -1,4 +1,5 @@
 import "../scss/style.scss";
+import "billboard.js/dist/billboard.css";
 import "bootstrap";
 import {
 	loadData as byodLoadData,
@@ -83,6 +84,9 @@ calcButton.addEventListener("click", () => {
 			.then((datum) => {
 				processDatum(datum, sched);
 				resultSection.classList.remove("d-none");
+				import("./charts.ts").then(({ renderCharts }) => {
+					renderCharts(datum);
+				});
 			})
 			.catch((reason) => {
 				console.error("Error calculating ToU: %s", reason);
