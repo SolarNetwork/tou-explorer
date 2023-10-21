@@ -1,4 +1,5 @@
 import "../scss/style.scss";
+import "billboard.js/dist/billboard.css";
 import "bootstrap";
 import {
 	loadData as byodLoadData,
@@ -13,6 +14,7 @@ import {
 	TemporalRangesTariffScheduleOptions,
 } from "nifty-tou";
 import { TouBreakdown, OverallUsage } from "./breakdown";
+import { renderCharts } from "./charts.ts";
 import { parseScheduleCsv } from "./csv";
 import {
 	ByodSettingsFormElements,
@@ -83,6 +85,9 @@ calcButton.addEventListener("click", () => {
 			.then((datum) => {
 				processDatum(datum, sched);
 				resultSection.classList.remove("d-none");
+				setTimeout(() => {
+					renderCharts(datum);
+				}, 200);
 			})
 			.catch((reason) => {
 				console.error("Error calculating ToU: %s", reason);

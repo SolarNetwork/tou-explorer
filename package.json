@@ -50,15 +50,18 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "billboard.js": "^3.9.4",
     "bootstrap": "^5.3.2",
+    "d3-array": "^3.2.4",
     "d3-time-format": "^4.1.0",
     "nifty-tou": "SolarNetwork/nifty-tou#develop",
     "papaparse": "^5.4.1",
     "read-excel-file": "^5.7.1",
-    "solarnetwork-api-core": "SolarNetwork/sn-api-core-js#feature/ts"
+    "solarnetwork-api-core": "SolarNetwork/sn-api-core-js#develop"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
+    "@types/d3-array": "^3.0.9",
     "@types/d3-time-format": "^4.0.2",
     "@types/papaparse": "^5.3.8",
     "@typescript-eslint/eslint-plugin": "^6.7.2",
