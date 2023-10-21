@@ -1,4 +1,4 @@
-import bb, { area, line, zoom } from "billboard.js";
+import bb, { area, spline, zoom } from "billboard.js";
 import { GeneralDatum } from "./utils";
 import { DatumProperty } from "./byodata";
 import { timeFormat } from "d3-time-format";
@@ -104,7 +104,6 @@ function generateSeasonalWeekdayChart() {
 			return day;
 		}
 	); // array of [Date, number(sumOfWattHours)]
-	console.debug("Sum by day: %o", days);
 	const data = rollup(
 		days,
 		(D) => mean(D, (d) => d[1]),
@@ -123,13 +122,11 @@ function generateSeasonalWeekdayChart() {
 		result.push(series);
 	}
 
-	console.debug("Grouped by seasonal weekday: %o", result);
-
 	bb.generate({
 		data: {
 			x: "x",
 			columns: result,
-			type: line(),
+			type: spline(),
 			colors: {
 				Autumn: "#762123",
 				Winter: "#80a3b7",
@@ -211,13 +208,11 @@ function generateSeasonalTimeOfDayChart() {
 		result.push(series);
 	}
 
-	console.debug("Grouped by seasonal time of day: %o", result);
-
 	bb.generate({
 		data: {
 			x: "x",
 			columns: result,
-			type: line(),
+			type: spline(),
 			colors: {
 				Autumn: "#762123",
 				Winter: "#80a3b7",
