@@ -92,12 +92,11 @@ export async function parseScheduleCsv(
 								);
 						} else {
 							result.schedule = new TemporalRangesTariffSchedule(
-								rules
+								rules,
+								{ multipleMatch: true }
 							);
 						}
 						resolve(result);
-						//renderTariffSchedule();
-						//enableTouCalculation();
 					}
 					reject("No rows available.");
 				} catch (e) {

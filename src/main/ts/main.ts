@@ -286,21 +286,23 @@ function processDatum<
 
 		readingEnd = d[datumPropName + "_end"] * scale;
 
-		const tariff = schedule.firstMatch(d.date);
-		if (tariff) {
-			const ruleIdx = schedule.rules.indexOf(tariff);
-			let groupData = tariffGroups.get(ruleIdx);
-			if (!groupData) {
-				groupData = new TouBreakdown(
-					ruleIdx + 1,
-					unitQuantity,
-					rateDivisor,
-					tariff,
-					tariffSettings.tariffCurrencyCode.value
-				);
-				tariffGroups.set(ruleIdx, groupData);
+		const tariffs = schedule.matches(d.date);
+		if (tariffs.length) {
+			for (const tariff of tariffs) {
+				const ruleIdx = schedule.rules.indexOf(tariff);
+				let groupData = tariffGroups.get(ruleIdx);
+				if (!groupData) {
+					groupData = new TouBreakdown(
+						ruleIdx + 1,
+						unitQuantity,
+						rateDivisor,
+						tariff,
+						tariffSettings.tariffCurrencyCode.value
+					);
+					tariffGroups.set(ruleIdx, groupData);
+				}
+				groupData.addUsage(d[datumPropName] * scale);
 			}
-			groupData.addUsage(d[datumPropName] * scale);
 		}
 	}
 	if (!overall) {
