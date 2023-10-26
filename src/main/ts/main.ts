@@ -1,6 +1,6 @@
 import "../scss/style.scss";
 import "billboard.js/dist/billboard.css";
-import { Tooltip, Popover } from "bootstrap";
+import { Popover, Tab } from "bootstrap";
 import {
 	loadData as byodLoadData,
 	setupByodIntegration,
@@ -68,10 +68,15 @@ replaceData(document.querySelector<HTMLElement>("#app-version")!, {
 	"app-version": APP_VERSION,
 }).classList.add("d-md-block");
 
+// setup tab nav
+document
+	.querySelectorAll('[data-bs-toggle="tab"]')
+	.forEach((el) => new Tab(el));
+
 // enable popovers
-Array.from(document.querySelectorAll('[data-bs-toggle="popover"]')).forEach(
-	(el) => new Popover(el)
-);
+document
+	.querySelectorAll('[data-bs-toggle="popover"]')
+	.forEach((el) => new Popover(el));
 
 document
 	.querySelector<HTMLElement>("#data-settings-tabs")!
