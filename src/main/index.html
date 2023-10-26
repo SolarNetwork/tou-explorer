@@ -336,6 +336,14 @@
 									<li>
 										<a
 											class="dropdown-item"
+											href="examples/multi-tou-tariff-schedule-example.csv"
+											>Multiple tariffs weekday/weekend
+											variable blocks</a
+										>
+									</li>
+									<li>
+										<a
+											class="dropdown-item"
 											href="examples/144-tariff-schedule-example.csv"
 											>144 4-hourly weekday/weekend
 											blocks</a
@@ -345,17 +353,11 @@
 							</div>
 						</div>
 					</form>
-					<div class="max-height-scroller my-3">
+					<div class="max-height-scroller mt-3">
 						<table
 							class="table table-striped d-none"
 							id="schedule-table"
 						>
-							<caption>
-								<small
-									>Tariff rules active right now are shown in
-									bold.</small
-								>
-							</caption>
 							<thead>
 								<tr>
 									<th>#</th>
@@ -370,6 +372,12 @@
 							<tbody class="table-group-divider"></tbody>
 						</table>
 					</div>
+					<p class="mt-0">
+						<small class="text-secondary"
+							>Tariff rules active right now are shown in
+							bold.</small
+						>
+					</p>
 					<template id="schedule-rule">
 						<tr>
 							<td class="data-idx"></td>
