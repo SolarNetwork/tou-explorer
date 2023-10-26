@@ -1,6 +1,6 @@
 import "../scss/style.scss";
 import "billboard.js/dist/billboard.css";
-import "bootstrap";
+import { Tooltip, Popover } from "bootstrap";
 import {
 	loadData as byodLoadData,
 	setupByodIntegration,
@@ -68,6 +68,11 @@ replaceData(document.querySelector<HTMLElement>("#app-version")!, {
 	"app-version": APP_VERSION,
 }).classList.add("d-md-block");
 
+// enable popovers
+Array.from(document.querySelectorAll('[data-bs-toggle="popover"]')).forEach(
+	(el) => new Popover(el)
+);
+
 document
 	.querySelector<HTMLElement>("#data-settings-tabs")!
 	.addEventListener("shown.bs.tab", () => {
@@ -76,16 +81,24 @@ document
 
 calcButton.addEventListener("click", () => {
 	const sched = tariffSchedule;
+	const byod = currentDataSource() === DataSource.BYOD;
 	if (sched) {
 		calcButton.disabled = true;
 		calcProgressBar.classList.remove("d-none"); // show progress bar
 		resultSection.classList.add("d-none"); // hide old results
-		(currentDataSource() === DataSource.BYOD ? byodLoadData : snLoadData)()
+		(byod ? byodLoadData : snLoadData)()
 			.then((datum) => {
 				processDatum(datum, sched);
 				resultSection.classList.remove("d-none");
 				import("./charts.ts").then(({ renderCharts }) => {
-					renderCharts(datum);
+					renderCharts(datum, {
+						propName: byod
+							? "wattHours"
+							: snSettings.snDatumProperty.value,
+						scale: byod
+							? 1
+							: snSettings.snDatumPropertyScale.valueAsNumber,
+					});
 				});
 			})
 			.catch((reason) => {
@@ -243,6 +256,8 @@ function processDatum<
 >(datum: Iterable<GeneralDatum>, schedule: TemporalRangesTariffSchedule<T, O>) {
 	const datumPropName =
 		snSettings.snDatumProperty.value || DatumProperty.ENERGY;
+	const byod = currentDataSource() === DataSource.BYOD;
+	const scale = byod ? 1 : snSettings.snDatumPropertyScale.valueAsNumber;
 	const nonTouRate = tariffSettings.tariffRate.valueAsNumber;
 	const rateDivisor =
 		tariffSettings.tariffCurrencyUnit.value === "$" ? 1 : 100;
@@ -258,13 +273,13 @@ function processDatum<
 			overall = new OverallUsage(
 				unitQuantity,
 				nonTouRate / rateDivisor,
-				d[datumPropName + "_start"],
+				d[datumPropName + "_start"] * scale,
 				tariffSettings.tariffCurrencyCode.value
 			);
 		}
-		overall.addUsage(d[datumPropName]);
+		overall.addUsage(d[datumPropName] * scale);
 
-		readingEnd = d[datumPropName + "_end"];
+		readingEnd = d[datumPropName + "_end"] * scale;
 
 		const tariff = schedule.firstMatch(d.date);
 		if (tariff) {
@@ -280,7 +295,7 @@ function processDatum<
 				);
 				tariffGroups.set(ruleIdx, groupData);
 			}
-			groupData.addUsage(d[datumPropName]);
+			groupData.addUsage(d[datumPropName] * scale);
 		}
 	}
 	if (!overall) {

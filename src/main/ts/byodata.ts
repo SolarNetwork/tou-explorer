@@ -301,8 +301,8 @@ function extractTimeCols(headerRow: string[]): Map<number, number> {
 const EXCEL_EPOCH = new Date(1899, 11, 30);
 
 // TODO: need way to let UI specify format
-const DMY_DATE_TIME = timeParse("%-m/%-d/%Y %H:%M:%S");
-const DMY_DATE_HHMM = timeParse("%-m/%-d/%Y %H:%M");
+const DMY_DATE_TIME = timeParse("%-d/%-m/%Y %H:%M:%S");
+const DMY_DATE_HHMM = timeParse("%-d/%-m/%Y %H:%M");
 
 function cellDate(row: any[], idx: number): Date {
 	let val = undefined;
@@ -317,18 +317,17 @@ function cellDate(row: any[], idx: number): Date {
 		// treat as Excel date, as number of days since 1900-01-00 with 1900 (bug) leap year
 		return new Date(EXCEL_EPOCH.getTime() + num * 24 * 60 * 60 * 1000);
 	}
-	let result = new Date(val);
-	if (isNaN(result.getTime())) {
-		let d = DMY_DATE_TIME(val);
-		if (d) {
-			return d;
-		}
-		d = DMY_DATE_HHMM(val);
-		if (d) {
-			return d;
-		}
+
+	let d = DMY_DATE_TIME(val);
+	if (d) {
+		return d;
 	}
-	return result;
+	d = DMY_DATE_HHMM(val);
+	if (d) {
+		return d;
+	}
+	d = new Date(val);
+	return d;
 }
 
 /** A mapping of datum property names to regular expressions that match header column names. */

@@ -9,20 +9,38 @@ const tooltipDateFormat = timeFormat("%Y-%m-%d %H:%M");
 
 let datum: GeneralDatum[];
 
-export function renderCharts(data: Iterable<GeneralDatum>) {
-	datum = Array.from(data);
-	generateEnergyChart();
-	generateSeasonalWeekdayChart();
-	generateSeasonalTimeOfDayChart();
+export interface SeriesConfig {
+	propName?: string | DatumProperty;
+	displayName?: string;
+	scale?: number;
 }
 
-function generateEnergyChart() {
+export function renderCharts(
+	data: Iterable<GeneralDatum>,
+	config?: SeriesConfig
+) {
+	datum = Array.from(data);
+	generateEnergyChart(config);
+	generateSeasonalWeekdayChart(config);
+	generateSeasonalTimeOfDayChart(config);
+}
+
+function seriesConfig(config?: SeriesConfig): Required<SeriesConfig> {
+	return {
+		propName: config?.propName || DatumProperty.ENERGY,
+		displayName: config?.displayName || "Energy (kWh)",
+		scale: 1000 / (config?.scale || 1),
+	};
+}
+
+function generateEnergyChart(config?: SeriesConfig) {
+	const c = seriesConfig(config);
 	bb.generate({
 		data: {
 			json: datum,
 			keys: {
 				x: "date",
-				value: [DatumProperty.ENERGY],
+				value: [c.propName],
 			},
 			type: area(),
 		},
@@ -41,10 +59,10 @@ function generateEnergyChart() {
 				},
 			},
 			y: {
-				label: "Energy (kWh)",
+				label: c.displayName,
 				tick: {
 					format: function (v: number) {
-						return v / 1000;
+						return v / c.scale;
 					},
 				},
 			},
@@ -94,10 +112,11 @@ for (let i = 1; i < 8; i++) {
 
 const WEEKDAY_COLUMNS: any[] = ["x"].concat(...(WEEKDAYS as any));
 
-function generateSeasonalWeekdayChart() {
+function generateSeasonalWeekdayChart(config?: SeriesConfig) {
+	const c = seriesConfig(config);
 	const days = rollups(
 		datum,
-		(D) => sum(D, (d) => d.wattHours),
+		(D) => sum(D, (d) => d[c.propName]),
 		(d) => {
 			const day = new Date(d.date);
 			day.setHours(0, 0, 0, 0);
@@ -149,10 +168,10 @@ function generateSeasonalWeekdayChart() {
 				},
 			},
 			y: {
-				label: "Average Energy (kWh)",
+				label: c.displayName,
 				tick: {
 					format: function (v: number) {
-						return v / 1000;
+						return v / c.scale;
 					},
 				},
 			},
@@ -183,10 +202,11 @@ for (let i = 0; i < 24; i++) {
 
 const HOURS_OF_DAY_COLUMNS: any[] = ["x"].concat(...(HOURS_OF_DAY as any));
 
-function generateSeasonalTimeOfDayChart() {
+function generateSeasonalTimeOfDayChart(config?: SeriesConfig) {
+	const c = seriesConfig(config);
 	const hours = rollups(
 		datum,
-		(D) => sum(D, (d) => d.wattHours),
+		(D) => sum(D, (d) => d[c.propName]),
 		(d) => {
 			const hour = new Date(d.date);
 			hour.setMinutes(0, 0, 0);
@@ -235,10 +255,10 @@ function generateSeasonalTimeOfDayChart() {
 				},
 			},
 			y: {
-				label: "Average Energy (kWh)",
+				label: c.displayName,
 				tick: {
 					format: function (v: number) {
-						return v / 1000;
+						return v / c.scale;
 					},
 				},
 			},
