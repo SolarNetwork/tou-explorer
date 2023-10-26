@@ -1,0 +1,5 @@
+Month,Day,Day of Week,Hour of Day,Rate
+Jan-Dec,,Mon-Fri,0-8,10.48
+Jan-Dec,,Mon-Fri,8-24,11.00
+Jan-Dec,,Sat-Sun,0-8,9.19
+Jan-Dec,,Sat-Sun,8-24,11.21
