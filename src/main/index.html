@@ -175,7 +175,7 @@
 									></select>
 								</div>
 							</div>
-							<div class="row">
+							<div class="row my-3">
 								<div class="col">
 									<label
 										for="snDatumProperty"
@@ -186,6 +186,30 @@
 										class="form-control"
 										id="snDatumProperty"
 									></select>
+								</div>
+							</div>
+							<div class="row my-3">
+								<div class="col">
+									<label
+										for="snDatumPropertyScale"
+										class="form-label"
+										>Unit scale
+										<button
+											type="button"
+											class="btn btn-sm"
+											data-bs-toggle="popover"
+											data-bs-content="The datum property unit scale. For example enter 1000 if the datum property values represent kilo- units, such as kWh."
+										>
+											<i
+												class="bi bi-info-circle"
+											></i></button
+									></label>
+									<input
+										type="number"
+										class="form-control"
+										id="snDatumPropertyScale"
+										value="1"
+									/>
 								</div>
 							</div>
 						</form>

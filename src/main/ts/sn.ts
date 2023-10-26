@@ -113,7 +113,9 @@ async function loadSources(event: Event) {
 			}
 		}
 		settingsForm.snSourceId.selectedIndex = 0;
-		settingsForm.snSourceId.dispatchEvent(new Event("change"));
+		settingsForm.snSourceId.dispatchEvent(
+			new Event("change", { bubbles: true })
+		);
 	}
 }
 
@@ -143,23 +145,38 @@ async function loadSourceProperties() {
 	if (!(json && Array.isArray(json.data))) {
 		return;
 	}
+	// save ref to current property (if any) to try to re-select same name
+	let currValue =
+		settingsForm.snDatumProperty.selectedIndex > 0
+			? settingsForm.snDatumProperty.options[
+					settingsForm.snDatumProperty.selectedIndex
+			  ]!.value
+			: undefined;
 	// clear out and re-populate the property names menu
 	while (settingsForm.snDatumProperty.length) {
 		settingsForm.snDatumProperty.remove(0);
 	}
+	let newSelectedIndex = 0;
 	if (json.data.length) {
 		settingsForm.snDatumProperty.add(new Option("Choose...", ""));
+		let i = 0;
 		for (const meta of json.data) {
 			// add all accumulating properties to menu
 			if (Array.isArray(meta.a)) {
 				for (const p of meta.a) {
+					i += 1;
 					settingsForm.snDatumProperty.add(new Option(p, p));
+					if (p === currValue) {
+						newSelectedIndex = i;
+					}
 				}
 			}
 		}
 	}
-	settingsForm.snDatumProperty.selectedIndex = 0;
-	settingsForm.snDatumProperty.dispatchEvent(new Event("change"));
+	settingsForm.snDatumProperty.selectedIndex = newSelectedIndex;
+	settingsForm.snDatumProperty.dispatchEvent(
+		new Event("change", { bubbles: true })
+	);
 }
 
 export async function loadData(): Promise<Iterable<GeneralDatum>> {
