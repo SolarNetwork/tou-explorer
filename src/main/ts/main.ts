@@ -15,7 +15,7 @@ import {
 } from "nifty-tou";
 import { TouBreakdown, OverallUsage } from "./breakdown";
 import { parseScheduleCsv } from "./csv";
-import { ChronoTariffCost, FixedUI } from "./fixed.ts";
+import { FixedUI } from "./fixed.ts";
 import {
 	ByodSettingsFormElements,
 	SnSettingsFormElements,
