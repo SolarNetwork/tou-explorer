@@ -15,6 +15,7 @@ import {
 } from "nifty-tou";
 import { TouBreakdown, OverallUsage } from "./breakdown";
 import { parseScheduleCsv } from "./csv";
+import { FixedUI } from "./fixed.ts";
 import {
 	ByodSettingsFormElements,
 	SnSettingsFormElements,
@@ -43,11 +44,14 @@ const snSettingsForm =
 const snSettings = snSettingsForm.elements as unknown as SnSettingsFormElements;
 const tariffForm = document.querySelector<HTMLFormElement>("#tou-settings")!;
 const tariffSettings = tariffForm.elements as unknown as TouFormElements;
-const calcProgressBar = document.querySelector<HTMLElement>("#calc-progress")!;
 const resultSection = document.querySelector<HTMLElement>("#tou-results")!;
+
+const fixedUI = new FixedUI();
+
 const calcButton = document.querySelector<HTMLButtonElement>(
 	"#calculate-tou-button"
 )!;
+const calcProgressBar = document.querySelector<HTMLElement>("#calc-progress")!;
 
 /**
  * The type of data source.
@@ -84,6 +88,7 @@ document
 		enableTouCalculation();
 	});
 
+// calculate!
 calcButton.addEventListener("click", () => {
 	const sched = tariffSchedule;
 	const byod = currentDataSource() === DataSource.BYOD;
@@ -270,6 +275,10 @@ function processDatum<
 	const tariffGroups = new Map<number, TouBreakdown>();
 	let overall: OverallUsage | undefined;
 	let readingEnd: number = -1;
+	let startDate: Date | undefined;
+	let endDate: Date | undefined;
+	let dateSourceId: string | undefined;
+	let dateStep: number | undefined;
 	for (const d of datum) {
 		if (typeof d[datumPropName] !== "number") {
 			continue;
@@ -281,7 +290,12 @@ function processDatum<
 				d[datumPropName + "_start"] * scale,
 				tariffSettings.tariffCurrencyCode.value
 			);
+			dateSourceId = d.sourceId;
+			startDate = d.date;
+		} else if (dateStep === undefined && dateSourceId === d.sourceId) {
+			dateStep = d.date.getTime() - startDate!.getTime();
 		}
+		endDate = d.date;
 		overall.addUsage(d[datumPropName] * scale);
 
 		readingEnd = d[datumPropName + "_end"] * scale;
@@ -336,16 +350,55 @@ function processDatum<
 		),
 	});
 
+	// calcualte fixed rates
+	const fixedTbody = document.querySelector<HTMLTableSectionElement>(
+		"#fixed-tariff-costs"
+	)!;
+	while (fixedTbody.lastElementChild) {
+		fixedTbody.lastElementChild.remove();
+	}
+	let fixedCostsTotal = 0;
+	if (startDate && endDate) {
+		const fixedCosts = fixedUI.costs(
+			startDate,
+			new Date(endDate.getTime() + (dateStep ?? 0))
+		);
+		const tmpl =
+			document.querySelector<HTMLTemplateElement>("#fixed-tariff-cost")!;
+		let i = 0;
+		for (const fixedCost of fixedCosts) {
+			const row = tmpl.content.cloneNode(true) as HTMLTableRowElement;
+			i += 1;
+			const cost =
+				fixedCost.quantity *
+				(fixedCost.rule.rate / fixedCost.rule.rateDivisor);
+			fixedCostsTotal += cost;
+			replaceData(row, {
+				name: fixedCost.rule.name || "Fixed #" + i,
+				quantity:
+					Math.floor(fixedCost.quantity) === fixedCost.quantity
+						? fixedCost.quantity
+						: fixedCost.quantity.toFixed(3),
+				cost: formatCurrency(
+					cost,
+					tariffSettings.tariffCurrencyCode.value
+				),
+			});
+			fixedTbody.appendChild(row);
+		}
+	}
+
 	// calculate Overall diff
+	const totalFlatAndFixedCost = overall.cost + fixedCostsTotal;
 	const diffRow = document.querySelector<HTMLElement>("#overall-diff")!;
 	replaceData(diffRow, {
 		cost: formatCurrency(
-			overallTouCost - overall.cost,
+			overallTouCost - totalFlatAndFixedCost,
 			tariffSettings.tariffCurrencyCode.value
 		),
 	});
 	betterOrWorseStyle(
-		overall.cost,
+		totalFlatAndFixedCost,
 		overallTouCost,
 		diffRow.querySelector(".data-cost")!
 	);

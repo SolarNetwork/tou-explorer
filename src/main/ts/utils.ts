@@ -7,6 +7,12 @@ import {
 	YearTemporalRangesTariffScheduleOptions,
 } from "nifty-tou";
 
+/** Custom expando element property name. */
+export const TOU_DATA = "touData";
+
+/** Custom data property for an "item". */
+export const ITEM = "item";
+
 export interface GeneralDatum extends Object {
 	nodeId: number;
 	sourceId: string;
@@ -74,4 +80,65 @@ export function formatCurrency(n: number, currency?: string): string {
 		CURRENCY_FORMAT_CACHE.set(currencyCode, fmt);
 	}
 	return fmt.format(n);
+}
+
+interface ExpandoElement extends HTMLElement {
+	touData?: object;
+}
+
+/**
+ * Get all available custom data.
+ * @param el - the element to get the data from
+ * @returns - the data object or undefined
+ */
+export function touData<T extends HTMLElement>(
+	el: T
+): { [k: string]: object } | undefined;
+
+/**
+ * Get a custom data value.
+ * @param el - the element get get the data value from
+ * @param key - the key of the data value to get
+ * @returns - the data value or undefined
+ */
+export function touData<T extends HTMLElement>(el: T, key: string): any;
+
+/**
+ * Set a custom data value.
+ *
+ * @param el - the element get set the data value on
+ * @param key - the key of the data value to set
+ * @param val - the data value to set
+ * @returns the `el` element
+ */
+export function touData<T extends HTMLElement>(el: T, key: string, val: any): T;
+
+/**
+ *
+ * @param el - the element to manage data on
+ * @param key  - if provided, the key of the data property to get or set
+ * @param val  - if provided, the value to set on `key`
+ * @returns if neither `key` nor `val` provided, the custom data object (or undefined);
+ *     if `key` provided without `val` then the current value of the `key` data property;
+ *     if both `key` and `val` then then the `el` element
+ */
+export function touData<T extends HTMLElement>(
+	el: T,
+	key?: string,
+	val?: any
+): T | { [k: string]: object } | any {
+	const ex = el as ExpandoElement;
+	if (val && key) {
+		let d = ex[TOU_DATA] as { [k: string]: object };
+		if (!d) {
+			d = {};
+			ex[TOU_DATA] = d;
+		}
+		d[key] = val;
+		return el;
+	} else if (key) {
+		let d = ex[TOU_DATA] as { [k: string]: object };
+		return d?.[key];
+	}
+	return ex[TOU_DATA] as { [k: string]: object };
 }

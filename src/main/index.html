@@ -390,6 +390,61 @@
 						</tr>
 					</template>
 
+					<p class="mt-5">
+						Optionally, add any number of "fixed" tariffs, such as a
+						daily charge.
+					</p>
+					<div class="mt-3">
+						<table
+							class="table table-striped d-none"
+							id="fixed-table"
+						>
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>Name</th>
+									<th>Rate</th>
+									<th>Period</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody class="table-group-divider"></tbody>
+						</table>
+						<template id="fixed-rule">
+							<tr class="align-middle">
+								<td class="data-idx"></td>
+								<td class="data-name"></td>
+								<td class="data-rate"></td>
+								<td class="data-chronoUnit"></td>
+								<td class="text-end">
+									<button
+										class="btn btn-small delete"
+										title="Delete rate"
+									>
+										<i class="bi bi-x-circle delete"></i>
+									</button>
+								</td>
+							</tr>
+						</template>
+					</div>
+
+					<div class="row g-3">
+						<div class="col-auto">
+							<button
+								class="btn btn-primary"
+								data-bs-toggle="modal"
+								data-bs-target="#add-fixed-modal"
+							>
+								<i class="bi bi-plus-circle"></i>
+								Add Fixed Tariff
+							</button>
+						</div>
+					</div>
+
+					<p class="mt-5">
+						Finally, click the Calculate button to calcualte the
+						time of use tariff based on the data you have provided.
+					</p>
 					<div class="d-grid my-3">
 						<button
 							class="btn btn-primary"
@@ -443,6 +498,9 @@
 									<td class="data-usage text-end"></td>
 									<td class="data-cost text-end"></td>
 								</tr>
+							</tbody>
+							<tbody id="fixed-tariff-costs"></tbody>
+							<tbody class="table-group-divider">
 								<tr id="overall-tou">
 									<td>Time of use</td>
 									<td></td>
@@ -459,6 +517,16 @@
 								</tr>
 							</tfoot>
 						</table>
+						<template id="fixed-tariff-cost">
+							<tr>
+								<td class="data-name"></td>
+								<td
+									colspan="3"
+									class="data-quantity text-end"
+								></td>
+								<td class="data-cost text-end"></td>
+							</tr>
+						</template>
 
 						<h2 class="mt-5">Time of use breakdown</h2>
 						<p>
@@ -529,6 +597,99 @@
 				</main>
 			</div>
 		</div>
+
+		<form id="add-fixed-modal" class="modal fade" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Add fixed rate tariff</h5>
+						<button
+							type="button"
+							class="btn-close"
+							data-bs-dismiss="modal"
+							aria-label="Close"
+						></button>
+					</div>
+					<div class="modal-body">
+						<div class="container-fluid">
+							<div class="row">
+								<div class="col">
+									<label
+										for="fixedTariffName"
+										class="form-label"
+										>Name</label
+									>
+									<input
+										type="text"
+										class="form-control"
+										id="fixedTariffName"
+										placeholder="Optional"
+									/>
+								</div>
+							</div>
+							<div class="row mt-3">
+								<div class="col-auto">
+									<label
+										for="fixedTariffRate"
+										class="form-label"
+										>Details</label
+									>
+								</div>
+							</div>
+							<div class="row align-items-center mb-3">
+								<div class="col-4">
+									<input
+										type="number"
+										placeholder="Rate"
+										class="form-control"
+										id="fixedTariffRate"
+									/>
+								</div>
+								<div class="col-auto">
+									<select
+										class="form-control"
+										id="fixedTariffCurrencyUnit"
+										aria-label="Tariff currency unit"
+										title="Rates expressed as whole ($) or 1/100 (¢) currency units"
+									>
+										<option selected>¢</option>
+										<option>$</option>
+									</select>
+								</div>
+								<div class="col-auto">per</div>
+								<div class="col-auto">
+									<select
+										class="form-control"
+										id="fixedTariffChronoUnit"
+									>
+										<option value="DAYS">Day</option>
+										<option value="WEEKS">Week</option>
+										<option value="MONTHS">Month</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Close
+						</button>
+						<button
+							type="button"
+							class="btn btn-primary"
+							id="fixedTariffChronoUnitSubmit"
+							disabled
+						>
+							Add
+						</button>
+					</div>
+				</div>
+			</div>
+		</form>
 
 		<script type="module" src="ts/main.ts"></script>
 	</body>
