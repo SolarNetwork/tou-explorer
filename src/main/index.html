@@ -288,6 +288,61 @@
 								<span>units</span>
 							</div>
 						</div>
+
+						<p class="mt-5">
+							Optionally, add any number of "fixed" tariffs, such
+							as a daily charge.
+						</p>
+						<div class="mt-3">
+							<table
+								class="table table-striped d-none"
+								id="fixed-table"
+							>
+								<thead>
+									<tr>
+										<th>#</th>
+										<th>Name</th>
+										<th>Rate</th>
+										<th>Period</th>
+										<th></th>
+									</tr>
+								</thead>
+								<tbody class="table-group-divider"></tbody>
+							</table>
+							<template id="fixed-rule">
+								<tr class="align-middle">
+									<td class="data-idx"></td>
+									<td class="data-name"></td>
+									<td class="data-rate"></td>
+									<td class="data-chronoUnit"></td>
+									<td class="text-end">
+										<button
+											class="btn btn-small delete"
+											title="Delete rate"
+										>
+											<i
+												class="bi bi-x-circle delete"
+											></i>
+										</button>
+									</td>
+								</tr>
+							</template>
+						</div>
+
+						<div class="row g-3">
+							<div class="col-auto">
+								<button
+									type="button"
+									class="btn btn-primary"
+									data-bs-toggle="modal"
+									data-bs-target="#add-fixed-modal"
+								>
+									<i class="bi bi-plus-circle"></i>
+									Add Fixed Tariff
+								</button>
+							</div>
+						</div>
+
 						<p class="mt-5">
 							Next, provide a time-of-use schedule, in the form of
 							a spreadsheet-friendly CSV file. You can download an
@@ -389,57 +444,6 @@
 							<td class="data-rates"></td>
 						</tr>
 					</template>
-
-					<p class="mt-5">
-						Optionally, add any number of "fixed" tariffs, such as a
-						daily charge.
-					</p>
-					<div class="mt-3">
-						<table
-							class="table table-striped d-none"
-							id="fixed-table"
-						>
-							<thead>
-								<tr>
-									<th>#</th>
-									<th>Name</th>
-									<th>Rate</th>
-									<th>Period</th>
-									<th></th>
-								</tr>
-							</thead>
-							<tbody class="table-group-divider"></tbody>
-						</table>
-						<template id="fixed-rule">
-							<tr class="align-middle">
-								<td class="data-idx"></td>
-								<td class="data-name"></td>
-								<td class="data-rate"></td>
-								<td class="data-chronoUnit"></td>
-								<td class="text-end">
-									<button
-										class="btn btn-small delete"
-										title="Delete rate"
-									>
-										<i class="bi bi-x-circle delete"></i>
-									</button>
-								</td>
-							</tr>
-						</template>
-					</div>
-
-					<div class="row g-3">
-						<div class="col-auto">
-							<button
-								class="btn btn-primary"
-								data-bs-toggle="modal"
-								data-bs-target="#add-fixed-modal"
-							>
-								<i class="bi bi-plus-circle"></i>
-								Add Fixed Tariff
-							</button>
-						</div>
-					</div>
 
 					<p class="mt-5">
 						Finally, click the Calculate button to calcualte the
