@@ -19,3 +19,11 @@ export interface TouFormElements extends HTMLFormControlsCollection {
 	tariffQuantity: HTMLInputElement;
 	scheduleCsv: HTMLInputElement;
 }
+
+export interface FixedTariffFormElements extends HTMLFormControlsCollection {
+	fixedTariffName: HTMLInputElement;
+	fixedTariffRate: HTMLInputElement;
+	fixedTariffCurrencyUnit: HTMLSelectElement;
+	fixedTariffChronoUnit: HTMLSelectElement;
+	fixedTariffChronoUnitSubmit: HTMLButtonElement;
+}
