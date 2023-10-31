@@ -58,7 +58,7 @@
     "nifty-tou": "SolarNetwork/nifty-tou#develop",
     "papaparse": "^5.4.1",
     "read-excel-file": "^5.7.1",
-    "solarnetwork-api-core": "SolarNetwork/sn-api-core-js#develop"
+    "solarnetwork-api-core": "^2.0.1"
   },
   "devDependencies": {
     "@ava/typescript": "^4.1.0",
@@ -79,7 +79,6 @@
     "vite": "^4.4.9"
   },
   "overrides": {
-    "crypto-js": "4.2.0",
     "json5": "2.2.3",
     "lodash": "4.17.21",
     "minimist": "1.2.8",
